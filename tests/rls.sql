@@ -1,0 +1,43 @@
+begin;
+insert into auth.users(id) values ('00000000-0000-0000-0000-000000000001'), ('00000000-0000-0000-0000-000000000002'), ('00000000-0000-0000-0000-000000000003');
+insert into public.esipk_schools(id, display_name) values ('10000000-0000-0000-0000-000000000001', 'School A'), ('10000000-0000-0000-0000-000000000002', 'School B');
+insert into public.esipk_profiles values ('00000000-0000-0000-0000-000000000001','school','10000000-0000-0000-0000-000000000001'), ('00000000-0000-0000-0000-000000000002','school','10000000-0000-0000-0000-000000000002'), ('00000000-0000-0000-0000-000000000003','admin',null);
+insert into public.esipk_quarters(school_id,data) values ('10000000-0000-0000-0000-000000000001','{"namaKuarters":"A"}'), ('10000000-0000-0000-0000-000000000002','{"namaKuarters":"B"}');
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+do $$ declare denied boolean; n integer; begin
+ if (select count(*) from public.esipk_quarters) <> 1 then raise exception 'School reads another school'; end if;
+ if (select count(*) from public.esipk_schools) <> 1 then raise exception 'School directory is unscoped'; end if;
+ if (select count(*) from public.esipk_profiles) <> 1 then raise exception 'Other profiles are visible'; end if;
+ update public.esipk_quarters set data = '{"namaKuarters":"Changed"}'; get diagnostics n = row_count;
+ if n <> 1 then raise exception 'Own-school update failed'; end if;
+ denied := false;
+ begin insert into public.esipk_quarters(school_id,data) values ('10000000-0000-0000-0000-000000000002','{}'); exception when insufficient_privilege then denied := true; end;
+ if not denied then raise exception 'Cross-school insertion allowed'; end if;
+ denied := false;
+ begin update public.esipk_profiles set role='admin',school_id=null; exception when insufficient_privilege then denied := true; end;
+ if not denied then raise exception 'Self-promotion allowed'; end if;
+ denied := false;
+ begin update public.esipk_quarters set data = '{"justifikasiPPD":"forged"}'; exception when raise_exception then denied := true; end;
+ if not denied then raise exception 'School edited PPD justification'; end if;
+ delete from public.esipk_quarters; get diagnostics n = row_count;
+ if n <> 0 then raise exception 'School deleted records'; end if;
+ insert into storage.objects(bucket_id,name) values ('esipk-damage','10000000-0000-0000-0000-000000000001/test.png');
+ denied := false;
+ begin insert into storage.objects(bucket_id,name) values ('esipk-damage','10000000-0000-0000-0000-000000000002/test.png'); exception when insufficient_privilege then denied := true; end;
+ if not denied then raise exception 'Cross-school upload allowed'; end if;
+end $$;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+do $$ begin if (select count(*) from storage.objects) <> 0 then raise exception 'Other school image visible'; end if; end $$;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
+do $$ begin
+ if (select count(*) from public.esipk_quarters) <> 2 then raise exception 'Admin cannot read all quarters'; end if;
+ update public.esipk_quarters set data = '{"justifikasiPPD":"approved"}';
+ if (select count(*) from storage.objects) <> 1 then raise exception 'Admin cannot read damage images'; end if;
+end $$;
+set local role anon;
+do $$ declare denied boolean := false; begin
+ begin perform * from public.esipk_quarters; exception when insufficient_privilege then denied := true; end;
+ if not denied then raise exception 'Anonymous table access allowed'; end if;
+end $$;
+rollback;
