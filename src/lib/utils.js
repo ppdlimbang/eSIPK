@@ -81,3 +81,7 @@ const readRoute = () => {
 
       const specialSchoolKey = (school) => formatSchoolName(parseSchoolStr(school).name).toLowerCase().replace(/\s+/g, ' ').trim();
       const getSpecialSchoolOptions = (school) => specialSchoolOptions[specialSchoolKey(school)] || null;
+      const isPpdManagedLocation = (value) => {
+        const parsed = typeof value === 'object' ? { code: value.code || '', name: value.name || '' } : parseSchoolStr(value);
+        return parsed.code.toUpperCase() === 'Y050' && specialSchoolKey(parsed.name) === 'flat pendidikan';
+      };

@@ -24,7 +24,11 @@ const createSchoolAccount = async ({ schoolName, schoolCode, email, password }) 
   const { data, error } = await getSupabase().functions.invoke('create-school-account', {
     body: { schoolName, schoolCode, email, password }
   });
-  if (error) throw new Error(error.context?.message || error.message || 'Pendaftaran akaun sekolah gagal.');
+  if (error) {
+    let detail;
+    try { detail = await error.context?.json(); } catch (_) {}
+    throw new Error(detail?.message || error.message || 'Pendaftaran akaun sekolah gagal.');
+  }
   if (!data?.school) throw new Error(data?.message || 'Pendaftaran akaun sekolah gagal.');
   return data.school;
 };

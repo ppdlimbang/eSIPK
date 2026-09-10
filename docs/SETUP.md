@@ -8,7 +8,7 @@
 4. Log masuk sebagai `admin@moe.gov.my` dengan profil `admin`. Di Tetapan, klik ikon edit sekolah. Isi nama, kod dan e-mel; isi kata laluan baharu hanya jika hendak menukarnya. Klik Simpan.
 5. Uji log masuk sekolah menggunakan maklumat baharu. Akaun sekolah tidak melihat Tetapan dan pautan `#/settings` akan dialihkan ke Dashboard.
 
-Sekolah mesti mempunyai tepat satu profil akaun sekolah yang dipautkan. Rekod kuarters kekal dipautkan melalui ID sekolah walaupun nama atau kod berubah. Kata laluan lama tidak boleh dipaparkan.
+Sekolah mesti mempunyai tepat satu profil akaun sekolah yang dipautkan. Rekod kuarters kekal dipautkan melalui ID sekolah walaupun nama atau kod berubah. Kata laluan lama tidak boleh dipaparkan. Pengecualian: `Y050 FLAT PENDIDIKAN` ialah unit PPD Limbang, jadi ia disimpan sebagai rujukan tanpa akaun log masuk sekolah.
 
 Fungsi mengesahkan pengguna melalui Auth dan menyemak peranan serta e-mel pentadbir sebelum mengubah akaun. Perubahan e-mel/kata laluan menggunakan [Supabase Admin updateUserById](https://supabase.com/docs/reference/javascript/auth-admin-updateuserbyid). Kemas kini langsung jadual sekolah oleh klien disekat supaya perubahan melalui fungsi ini.
 

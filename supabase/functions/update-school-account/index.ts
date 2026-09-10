@@ -44,8 +44,9 @@ Deno.serve(async (request) => {
   const schoolCode = String(payload.schoolCode || "").trim().toUpperCase();
   const email = String(payload.email || "").trim().toLowerCase();
   const password = String(payload.password || "");
+  const isPpdManaged = schoolCode === "Y050" && schoolName.toLowerCase() === "flat pendidikan";
   if (!/^[0-9a-f-]{36}$/i.test(schoolId) || !schoolName || !/^[A-Z0-9-]{3,20}$/.test(schoolCode) ||
-      !/^\S+@\S+\.\S+$/.test(email) || (password && password.length < 8)) {
+      (!isPpdManaged && (!/^\S+@\S+\.\S+$/.test(email) || (password && password.length < 8)))) {
     return response(400, { message: "Isi nama, kod dan e-mel sah. Kata laluan baharu minimum 8 aksara." });
   }
   const { data: school, error: schoolError } = await adminClient.from("esipk_schools")
@@ -53,24 +54,30 @@ Deno.serve(async (request) => {
   if (schoolError || !school) return response(404, { message: "Sekolah tidak ditemui. Pastikan migrasi akaun terkini telah dijalankan." });
   const { data: profiles, error: profileError } = await adminClient.from("esipk_profiles")
     .select("id").eq("school_id", schoolId).eq("role", "school");
-  if (profileError || profiles?.length !== 1) {
+  if (profileError || (!isPpdManaged && profiles?.length !== 1) || (isPpdManaged && (profiles?.length || 0) > 0)) {
     return response(409, { message: "Sekolah mesti mempunyai tepat satu akaun log masuk sebelum boleh dikemas kini." });
   }
-  const { data: target, error: targetError } = await adminClient.auth.admin.getUserById(profiles[0].id);
-  if (targetError || !target.user || target.user.id === user.id ||
-      target.user.email?.toLowerCase() === "admin@moe.gov.my") {
-    return response(409, { message: "Akaun sekolah tidak sah." });
+  let targetUserId = "";
+  let targetEmail = "";
+  if (!isPpdManaged) {
+    const { data: target, error: targetError } = await adminClient.auth.admin.getUserById(profiles[0].id);
+    if (targetError || !target.user || target.user.id === user.id ||
+        target.user.email?.toLowerCase() === "admin@moe.gov.my") {
+      return response(409, { message: "Akaun sekolah tidak sah." });
+    }
+    targetUserId = target.user.id;
+    targetEmail = target.user.email?.toLowerCase() || "";
   }
-  const values = { display_name: schoolCode + " " + schoolName, school_code: schoolCode, account_email: email };
+  const values = { display_name: schoolCode + " " + schoolName, school_code: schoolCode, account_email: isPpdManaged ? null : email };
   const { error: updateError } = await adminClient.from("esipk_schools").update(values).eq("id", schoolId);
   if (updateError) {
     return response(409, { message: "Kod, nama atau e-mel sekolah telah digunakan. Tiada perubahan akaun dibuat." });
   }
   const attributes: { email?: string; password?: string; email_confirm?: boolean } = {};
-  if (target.user.email?.toLowerCase() !== email) { attributes.email = email; attributes.email_confirm = true; }
+  if (targetEmail && targetEmail !== email) { attributes.email = email; attributes.email_confirm = true; }
   if (password) attributes.password = password;
   if (Object.keys(attributes).length) {
-    const { error: authError } = await adminClient.auth.admin.updateUserById(target.user.id, attributes);
+    const { error: authError } = await adminClient.auth.admin.updateUserById(targetUserId, attributes);
     if (authError) {
       const { error: rollbackError } = await adminClient.from("esipk_schools").update({
         display_name: school.display_name, school_code: school.school_code,

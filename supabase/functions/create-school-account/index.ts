@@ -42,17 +42,20 @@ Deno.serve(async (request) => {
   const schoolCode = String(payload.schoolCode || "").trim().toUpperCase();
   const email = String(payload.email || "").trim().toLowerCase();
   const password = String(payload.password || "");
-  if (!schoolName || !/^[A-Z0-9-]{3,20}$/.test(schoolCode) || !/^\S+@\S+\.\S+$/.test(email) || password.length < 8) {
+  const isPpdManaged = schoolCode === "Y050" && schoolName.toLowerCase() === "flat pendidikan";
+  if (!schoolName || !/^[A-Z0-9-]{3,20}$/.test(schoolCode) ||
+      (!isPpdManaged && (!/^\S+@\S+\.\S+$/.test(email) || password.length < 8))) {
     return response(400, { message: "Lengkapkan nama, kod sah, e-mel sah dan kata laluan sekurang-kurangnya 8 aksara." });
   }
 
   const displayName = `${schoolCode} ${schoolName}`;
   const { data: school, error: schoolError } = await adminClient
     .from("esipk_schools")
-    .insert({ display_name: displayName, school_code: schoolCode, account_email: email })
+    .insert({ display_name: displayName, school_code: schoolCode, account_email: isPpdManaged ? null : email })
     .select("id, display_name")
     .single();
   if (schoolError) return response(409, { message: "Kod, e-mel atau nama sekolah telah digunakan." });
+  if (isPpdManaged) return response(201, { school });
 
   const { data: createdUser, error: accountError } = await adminClient.auth.admin.createUser({
     email,

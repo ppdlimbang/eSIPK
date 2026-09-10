@@ -404,20 +404,21 @@ function useDashboard() {
       const handleAddSchool = async (e) => {
         e.preventDefault();
         if (loading || !isSettingsAdmin(authUser)) return;
-        if (!newSchoolName.trim() || !newSchoolCode.trim() || !newSchoolEmail.trim() || newSchoolPassword.length < 8) {
-          showStatus('error', 'Isi nama, kod, e-mel dan kata laluan sekurang-kurangnya 8 aksara.');
-          return;
-        }
         const cleanCode = newSchoolCode.trim().toUpperCase();
         const cleanName = formatSchoolName(newSchoolName.trim());
-        const cleanEmail = newSchoolEmail.trim().toLowerCase();
+        const ppdManaged = isPpdManagedLocation({ code: cleanCode, name: cleanName });
+        const cleanEmail = ppdManaged ? '' : newSchoolEmail.trim().toLowerCase();
+        if (!cleanName || !/^[A-Z0-9-]{3,20}$/.test(cleanCode) || (!ppdManaged && (!/^\S+@\S+\.\S+$/.test(cleanEmail) || newSchoolPassword.length < 8))) {
+          showStatus('error', ppdManaged ? 'Isi kod dan nama unit PPD yang sah.' : 'Isi nama, kod, e-mel dan kata laluan sekurang-kurangnya 8 aksara.');
+          return;
+        }
 
         setLoading(true);
         try {
-          const school = await createSchoolAccount({ schoolName: cleanName, schoolCode: cleanCode, email: cleanEmail, password: newSchoolPassword });
+          const school = await createSchoolAccount({ schoolName: cleanName, schoolCode: cleanCode, email: cleanEmail, password: ppdManaged ? '' : newSchoolPassword });
           setSchools(prev => [...prev, school.display_name].sort());
           setNewSchoolCode(''); setNewSchoolName(''); setNewSchoolEmail(''); setNewSchoolPassword('');
-          showStatus('success', 'Sekolah dan akaun log masuk berjaya didaftarkan.');
+          showStatus('success', ppdManaged ? 'Unit PPD berjaya didaftarkan.' : 'Sekolah dan akaun log masuk berjaya didaftarkan.');
         } catch (err) {
           showStatus('error', err.message || 'Gagal mendaftarkan sekolah.');
         } finally { setLoading(false); }
@@ -445,13 +446,15 @@ function useDashboard() {
         if (loading || !isSettingsAdmin(authUser)) return;
         const cleanCode = editSchoolCode.trim().toUpperCase();
         const cleanName = formatSchoolName(editSchoolName.trim());
-        if (!cleanName || !/^[A-Z0-9-]{3,20}$/.test(cleanCode) || !/^\S+@\S+\.\S+$/.test(editSchoolEmail.trim()) || (editSchoolPassword && editSchoolPassword.length < 8)) {
-          showStatus('error', 'Isi nama, kod dan e-mel sah. Kata laluan baharu mestilah sekurang-kurangnya 8 aksara.'); return;
+        const ppdManaged = isPpdManagedLocation({ code: cleanCode, name: cleanName });
+        const cleanEmail = ppdManaged ? '' : editSchoolEmail.trim().toLowerCase();
+        if (!cleanName || !/^[A-Z0-9-]{3,20}$/.test(cleanCode) || (!ppdManaged && (!/^\S+@\S+\.\S+$/.test(cleanEmail) || (editSchoolPassword && editSchoolPassword.length < 8)))) {
+          showStatus('error', ppdManaged ? 'Isi kod dan nama unit PPD yang sah.' : 'Isi nama, kod dan e-mel sah. Kata laluan baharu mestilah sekurang-kurangnya 8 aksara.'); return;
         }
 
         setLoading(true);
         try {
-          const school = await updateSchoolAccount({ schoolId: editSchoolId, schoolName: cleanName, schoolCode: cleanCode, email: editSchoolEmail.trim().toLowerCase(), password: editSchoolPassword });
+          const school = await updateSchoolAccount({ schoolId: editSchoolId, schoolName: cleanName, schoolCode: cleanCode, email: cleanEmail, password: ppdManaged ? '' : editSchoolPassword });
           setSchools(prev => prev.map(name => name === oldSchoolName ? school.display_name : name).sort());
           setSelectedSchoolFilter(prev => prev === oldSchoolName ? school.display_name : prev);
           setEditSchoolPassword('');
