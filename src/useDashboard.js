@@ -32,6 +32,9 @@ function useDashboard() {
       const [editingSchool, setEditingSchool] = useState(null);
       const [editSchoolCode, setEditSchoolCode] = useState('');
       const [editSchoolName, setEditSchoolName] = useState('');
+      const [editSchoolEmail, setEditSchoolEmail] = useState('');
+      const [editSchoolPassword, setEditSchoolPassword] = useState('');
+      const [editSchoolId, setEditSchoolId] = useState(null);
       const [gambarFiles, setGambarFiles] = useState([]);
       const [namaBangunanDipilih, setNamaBangunanDipilih] = useState('');
       const [unitBangunanDipilih, setUnitBangunanDipilih] = useState('');
@@ -103,14 +106,14 @@ function useDashboard() {
 
       const navigate = (next) => {
         if (!routeNames.includes(next)) return;
-        if (next === 'settings' && authUser?.type !== 'admin') return;
+        if (next === 'settings' && !isSettingsAdmin(authUser)) return;
         if (view === next) return;
         window.location.hash = '/' + next;
       };
       useEffect(() => {
         const syncRoute = () => {
           let next = readRoute();
-          if (isAuthenticated && next === 'settings' && authUser?.type !== 'admin') {
+          if (isAuthenticated && next === 'settings' && !isSettingsAdmin(authUser)) {
             next = 'dashboard';
             window.location.replace('#/dashboard');
           }
@@ -400,6 +403,7 @@ function useDashboard() {
 
       const handleAddSchool = async (e) => {
         e.preventDefault();
+        if (loading || !isSettingsAdmin(authUser)) return;
         if (!newSchoolName.trim() || !newSchoolCode.trim() || !newSchoolEmail.trim() || newSchoolPassword.length < 8) {
           showStatus('error', 'Isi nama, kod, e-mel dan kata laluan sekurang-kurangnya 8 aksara.');
           return;
@@ -419,23 +423,43 @@ function useDashboard() {
         } finally { setLoading(false); }
       };
 
+      const handleEditSchoolStart = async (schoolName) => {
+        if (loading || !isSettingsAdmin(authUser)) return;
+        setLoading(true); setEditSchoolPassword(''); setEditingSchool(null);
+        try {
+          const school = await getSchoolAccount(schoolName);
+          const parsed = parseSchoolStr(school.display_name);
+          setEditSchoolId(school.id); setEditSchoolCode(school.school_code || parsed.code);
+          setEditSchoolName(parsed.name); setEditSchoolEmail(school.account_email || '');
+          setEditingSchool(schoolName);
+        } catch (error) { showStatus('error', error.message || 'Gagal membaca akaun sekolah.'); }
+        finally { setLoading(false); }
+      };
+      useEffect(() => {
+        if (view !== 'settings' || !isSettingsAdmin(authUser)) {
+          setEditingSchool(null); setEditSchoolId(null); setEditSchoolEmail('');
+          setEditSchoolPassword(''); setNewSchoolPassword('');
+        }
+      }, [view, authUser]);
       const handleEditSchoolSave = async (oldSchoolName) => {
+        if (loading || !isSettingsAdmin(authUser)) return;
         const cleanCode = editSchoolCode.trim().toUpperCase();
         const cleanName = formatSchoolName(editSchoolName.trim());
-        if (!cleanName) { showStatus('error', 'Nama Sekolah wajib diisi.'); return; }
-        const combinedNew = cleanCode ? `${cleanCode} ${cleanName}` : cleanName;
-        if (combinedNew === oldSchoolName) { setEditingSchool(null); return; }
+        if (!cleanName || !/^[A-Z0-9-]{3,20}$/.test(cleanCode) || !/^\S+@\S+\.\S+$/.test(editSchoolEmail.trim()) || (editSchoolPassword && editSchoolPassword.length < 8)) {
+          showStatus('error', 'Isi nama, kod dan e-mel sah. Kata laluan baharu mestilah sekurang-kurangnya 8 aksara.'); return;
+        }
 
         setLoading(true);
         try {
-          const updatedSchools = await runGas('editSchool', oldSchoolName, combinedNew);
-          if (!Array.isArray(updatedSchools)) throw new Error('Respons sekolah tidak sah.');
-          setSchools(updatedSchools.filter(Boolean));
+          const school = await updateSchoolAccount({ schoolId: editSchoolId, schoolName: cleanName, schoolCode: cleanCode, email: editSchoolEmail.trim().toLowerCase(), password: editSchoolPassword });
+          setSchools(prev => prev.map(name => name === oldSchoolName ? school.display_name : name).sort());
+          setSelectedSchoolFilter(prev => prev === oldSchoolName ? school.display_name : prev);
+          setEditSchoolPassword('');
           setEditingSchool(null);
           await fetchInitialData();
           showStatus('success', 'Sekolah dikemas kini.');
         } catch (err) {
-          showStatus('error', 'Gagal mengemas kini sekolah.');
+          showStatus('error', err.message || 'Gagal mengemas kini sekolah.');
           await fetchInitialData();
         } finally { setLoading(false); }
       };
@@ -591,5 +615,5 @@ function useDashboard() {
       const isSpecialSchool = activeSchool && specialSchoolOptions[parseSchoolStr(activeSchool).name.toLowerCase()];
 
 
-  return { isAuthenticated, setIsAuthenticated, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToPDF, inputClass, isSpecialSchool, navigate };
+  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToPDF, inputClass, isSpecialSchool, navigate };
 }

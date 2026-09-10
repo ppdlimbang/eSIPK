@@ -14,7 +14,7 @@ const cases = [
   ['School selection', FormPage, { view: 'form', authUser: { type: 'admin' }, schools: [sample.namaSekolah], submissions: [sample] }, 'Pilih Sekolah Anda'],
   ['Record form', FormPage, { view: 'form', activeSchool: sample.namaSekolah, roleFilteredSubmissions: [sample], authUser: { type: 'school' }, formData: sample }, 'Rekod Kuarters Semasa'],
   ['Downloads', DownloadsPage, { view: 'muatTurun', filesList: [] }, 'Pusat Muat Turun'],
-  ['Settings', SettingsPage, { view: 'settings', authUser: { type: 'admin' }, schools: [sample.namaSekolah] }, 'Tetapan Konfigurasi'],
+  ['Settings', SettingsPage, { view: 'settings', authUser: { type: 'admin', email: 'ppdlimbang@moe.gov.my' }, schools: [sample.namaSekolah] }, 'Tetapan Konfigurasi'],
   ['Unit details', UnitDetails, { selectedUnit: sample }, 'role="dialog"']
 ];
 for (const [name, Component, overrides, expected] of cases) {
@@ -25,3 +25,14 @@ for (const [name, Component, overrides, expected] of cases) {
   if (name === 'Dashboard' && (html.match(/Unit fixture/g) || []).length !== 25) throw new Error('Dashboard did not paginate 60 records to 25');
   print('PASS render: ' + name);
 }
+
+for (const user of [{ type: 'school', email: 'school@example.com' }, { type: 'admin', email: 'other@example.com' }]) {
+  const html = ReactDOMServer.renderToStaticMarkup(<Fixture component={SettingsPage} overrides={{view: 'settings', authUser: user}} />);
+  if (html.includes('Urus Pangkalan Sekolah')) throw new Error('Unauthorized settings content rendered');
+}
+const editHtml = ReactDOMServer.renderToStaticMarkup(<Fixture component={SettingsPage} overrides={{
+  view: 'settings', authUser: {type: 'admin', email: 'ppdlimbang@moe.gov.my'},
+  schools: [sample.namaSekolah], editingSchool: sample.namaSekolah,
+  editSchoolEmail: 'school@example.com', editSchoolPassword: ''
+}} />);
+if (!editHtml.includes('Kata Laluan Baharu') || !editHtml.includes('school@example.com')) throw new Error('Missing account editing fields');

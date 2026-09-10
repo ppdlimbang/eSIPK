@@ -38,7 +38,12 @@
   assert(model.statusFilter === 'Semua', 'Logout clears filters');
   model.setLoginUsername('admin@example.com'); model.setLoginPassword('test-password'); render();
   await model.handleLogin(event); await settle(); model.navigate('settings'); render();
-  assert(model.authUser.type === 'admin' && model.view === 'settings', 'Admin role comes from stored profile');
+  assert(model.authUser.type === 'admin' && model.view !== 'settings', 'Other admin cannot open settings');
+  assert(!isSettingsAdmin({ type: 'school', email: 'ppdlimbang@moe.gov.my' }), 'Email alone cannot grant settings access');
+  await model.handleLogout(); await settle();
+  model.setLoginUsername('ppdlimbang@moe.gov.my'); model.setLoginPassword('test-password'); render();
+  await model.handleLogin(event); await settle(); model.navigate('settings'); render();
+  assert(model.view === 'settings', 'Designated PPD administrator can open settings');
   assert(await resolveAttachmentUrl('javascript:alert(1)') === '', 'Unsafe attachment protocol rejected');
   let rejected = false; try { await runGas('resetSchools'); } catch (_) { rejected = true; }
   assert(rejected, 'Bulk school reset disabled');

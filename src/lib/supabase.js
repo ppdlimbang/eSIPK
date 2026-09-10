@@ -1,4 +1,5 @@
 let supabaseClient;
+const isSettingsAdmin = (user) => user?.type === 'admin' && user.email?.toLowerCase() === 'ppdlimbang@moe.gov.my';
 const getSupabase = () => {
   if (!window.supabase) throw new Error('Sambungan Supabase gagal dimuatkan. Sila muat semula halaman.');
   if (!supabaseClient) supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.publishableKey, {
@@ -28,6 +29,17 @@ const createSchoolAccount = async ({ schoolName, schoolCode, email, password }) 
   return data.school;
 };
 const listSchools = async () => unwrap(await getSupabase().from('esipk_schools').select('id,display_name').order('display_name'));
+const getSchoolAccount = async (name) => unwrap(await getSupabase().from('esipk_schools').select('id,display_name,school_code,account_email').eq('display_name', name).single());
+const updateSchoolAccount = async (body) => {
+  const { data, error } = await getSupabase().functions.invoke('update-school-account', { body });
+  if (error) {
+    let detail;
+    try { detail = await error.context?.json(); } catch (_) {}
+    throw new Error(detail?.message || error.message || 'Kemas kini gagal.');
+  }
+  if (!data?.school) throw new Error(data?.message || 'Kemas kini gagal.');
+  return data.school;
+};
 const schoolByName = async (name) => {
   const rows = await listSchools();
   const school = rows.find(row => row.display_name === name);

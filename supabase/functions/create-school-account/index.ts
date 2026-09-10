@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://ppdlimbang.github.io",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json",
 };
@@ -32,7 +32,7 @@ Deno.serve(async (request) => {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  if (administrator?.role !== "admin") return response(403, { message: "Akses pentadbir diperlukan." });
+  if (administrator?.role !== "admin" || user.email?.toLowerCase() !== "ppdlimbang@moe.gov.my") return response(403, { message: "Akses pentadbir diperlukan." });
 
   let payload: { schoolName?: string; schoolCode?: string; email?: string; password?: string };
   try { payload = await request.json(); }

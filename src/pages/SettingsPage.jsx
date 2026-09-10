@@ -1,8 +1,8 @@
 function SettingsPage() {
-  const { authUser, view, schools, filesList, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, loading, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, inputClass } = useAppContext();
+  const { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, authUser, view, schools, filesList, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, loading, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, inputClass } = useAppContext();
   return (
 <>
-            {view === 'settings' && authUser?.type === 'admin' && (
+            {view === 'settings' && isSettingsAdmin(authUser) && (
               <div className="fade-in max-w-5xl mx-auto space-y-8">
                 <div className="mb-4">
                   <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Tetapan Konfigurasi</h2>
@@ -43,7 +43,7 @@ function SettingsPage() {
                     <div className="bg-indigo-50 p-2 rounded-xl text-indigo-600 border border-indigo-100"><Icons.Building2 className="w-5 h-5"/></div>
                     <h3 className="text-lg font-bold text-slate-900">Urus Pangkalan Sekolah</h3>
                   </div>
-                  <p className="text-sm font-medium text-slate-500 mb-6 pl-12">Daftarkan sekolah dan akaun log masuknya. Kata laluan dihantar terus ke Supabase Auth dan tidak disimpan dalam pangkalan data eSIPK.</p>
+                  <p className="text-sm font-medium text-slate-500 mb-6 pl-12">Daftar atau kemas kini akaun sekolah. Kosongkan kata laluan baharu untuk mengekalkan kata laluan semasa.</p>
 
                   <form onSubmit={handleAddSchool} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 p-5 bg-slate-50/80 rounded-2xl border border-slate-200 shadow-inner">
                     <div><label htmlFor="school-code" className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-2">Kod Sekolah <span className="text-rose-500">*</span></label><input id="school-code" required pattern="[A-Za-z0-9-]{3,20}" title="Gunakan 3 hingga 20 huruf, nombor atau sengkang" type="text" value={newSchoolCode} onChange={(e) => setNewSchoolCode(e.target.value)} placeholder="Cth: YBA1234" className={inputClass} /></div>
@@ -61,12 +61,14 @@ function SettingsPage() {
 
                         if (isEditing) {
                           return (
-                            <div key={index} className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-indigo-50/50 rounded-xl mb-1 border border-indigo-200">
-                              <input type="text" value={editSchoolCode} onChange={(e) => setEditSchoolCode(e.target.value)} placeholder="Kod Sekolah" className="w-full sm:w-32 bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 shadow-sm uppercase" />
-                              <input type="text" value={editSchoolName} onChange={(e) => setEditSchoolName(e.target.value)} placeholder="Nama Sekolah" className="flex-1 w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 shadow-sm" autoFocus />
+                            <div key={index} className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-indigo-50/50 rounded-xl mb-1 border border-indigo-200">
+                              <input aria-label="Kod Sekolah" type="text" value={editSchoolCode} onChange={(e) => setEditSchoolCode(e.target.value)} placeholder="Kod Sekolah" className="w-full sm:w-32 bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 shadow-sm uppercase" />
+                              <input aria-label="Nama Sekolah" type="text" value={editSchoolName} onChange={(e) => setEditSchoolName(e.target.value)} placeholder="Nama Sekolah" className="flex-1 w-full bg-white border border-indigo-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 shadow-sm" autoFocus />
+                              <label className="text-sm font-semibold">E-mel Sekolah<input type="email" value={editSchoolEmail} onChange={e => setEditSchoolEmail(e.target.value)} className={inputClass} /></label>
+                              <label className="text-sm font-semibold">Kata Laluan Baharu<input type="password" autoComplete="new-password" minLength={8} value={editSchoolPassword} onChange={e => setEditSchoolPassword(e.target.value)} placeholder="Kosongkan untuk kekalkan kata laluan" className={inputClass} /></label>
                               <div className="flex w-full sm:w-auto gap-2">
                                 <button onClick={() => handleEditSchoolSave(sekolah)} className="flex-1 sm:flex-none p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-sm flex justify-center items-center" title="Simpan"><Icons.CheckCircle2 className="w-5 h-5" /></button>
-                                <button onClick={() => setEditingSchool(null)} className="flex-1 sm:flex-none p-3 bg-white text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex justify-center items-center" title="Batal"><span className="font-bold">✕</span></button>
+                                <button onClick={() => { setEditingSchool(null); setEditSchoolPassword(''); }} className="flex-1 sm:flex-none p-3 bg-white text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex justify-center items-center" title="Batal"><span className="font-bold">✕</span></button>
                               </div>
                             </div>
                           );
@@ -75,8 +77,8 @@ function SettingsPage() {
                         return (
                         <div key={index} className="flex justify-between items-center p-4 hover:bg-slate-50 rounded-xl transition-colors group mb-1 border border-transparent hover:border-slate-100">
                           <div className="flex flex-col"><span className="text-sm font-semibold text-slate-700">{name}</span>{code && <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-0.5">{code}</span>}</div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                            <button type="button" onClick={() => { setEditingSchool(sekolah); setEditSchoolCode(code); setEditSchoolName(name); }} className="text-slate-400 hover:text-indigo-600 transition-all p-2 rounded-lg hover:bg-indigo-50" title="Kemaskini"><Icons.Edit3 className="w-4 h-4" /></button>
+                          <div className="flex gap-1 transition-all">
+                            <button type="button" onClick={() => handleEditSchoolStart(sekolah)} className="text-slate-400 hover:text-indigo-600 transition-all p-2 rounded-lg hover:bg-indigo-50" title="Kemaskini"><Icons.Edit3 className="w-4 h-4" /></button>
                             <button type="button" onClick={() => handleDeleteSchool(sekolah)} className="text-slate-400 hover:text-rose-600 transition-all p-2 rounded-lg hover:bg-rose-50" title="Padam"><Icons.Trash2 className="w-4 h-4" /></button>
                           </div>
                         </div>

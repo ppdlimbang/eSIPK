@@ -9,7 +9,7 @@ const mockAuth = {
   onAuthStateChange(fn) { authListener = fn; fn('INITIAL_SESSION', activeSession); return { data: { subscription: { unsubscribe() {} } } }; },
   async signInWithPassword({ email, password }) {
     if (password !== 'test-password') return { error: new Error('Invalid login credentials') };
-    const user = { id: email === 'admin@example.com' ? 'admin' : 'user-a', email };
+    const user = { id: ['admin@example.com', 'ppdlimbang@moe.gov.my'].includes(email) ? 'admin' : 'user-a', email };
     activeSession = { user }; authListener('SIGNED_IN', activeSession); return { data: { user } };
   },
   async signOut() { activeSession = null; authListener('SIGNED_OUT', null); return { error: null }; }
