@@ -36,6 +36,8 @@ The build needs Python 3 plus Node.js or macOS JavaScriptCore. Build dependencie
 
 `src/config.js` contains the URL and browser-safe publishable key. Never add secret/service-role keys or passwords. `src/lib/supabase.js` handles authentication profiles, database operations, and file uploads. `src/useDashboard.js` manages UI state. The adapter retains the old operation names internally but does not call Apps Script or save records to local storage.
 
+School accounts are created only by an administrator through the Settings page. The browser calls the `create-school-account` Supabase Edge Function, which verifies the administrator session before using its server-only service-role key to create the Auth account and scoped profile. Deploy that function and apply `202609100002_school_accounts.sql` before using the registration form.
+
 ## Access rules
 
 - Supabase Auth handles email/password login and session refresh. No embedded administrator password remains.

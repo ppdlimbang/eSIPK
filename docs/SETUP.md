@@ -28,6 +28,8 @@ No password belongs in this SQL, the source code, or GitHub. The previous browse
 
 Start the preview and open `http://localhost:8000/esipk_dashboard.html`. Log in with the administrator **email and password** created in step 2. Add schools through **Tetapan**.
 
+Before registering a school from Tetapan, run `supabase/migrations/202609100002_school_accounts.sql` once in SQL Editor. Then deploy the `create-school-account` Edge Function from `supabase/functions/create-school-account/` in the Supabase Dashboard or CLI. The function uses the project-managed `SUPABASE_SERVICE_ROLE_KEY`; never place that key in the app, GitHub, or browser. The registration form requires school name, school code, school email, and a password with at least eight characters.
+
 To provision a school account, create another Auth user, copy its UUID, and look up the school UUID:
 
 ```sql

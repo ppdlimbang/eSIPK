@@ -19,6 +19,14 @@ const signIn = async (email, password) => {
   return data.user;
 };
 const signOut = async () => { unwrap(await getSupabase().auth.signOut({ scope: 'local' })); };
+const createSchoolAccount = async ({ schoolName, schoolCode, email, password }) => {
+  const { data, error } = await getSupabase().functions.invoke('create-school-account', {
+    body: { schoolName, schoolCode, email, password }
+  });
+  if (error) throw new Error(error.context?.message || error.message || 'Pendaftaran akaun sekolah gagal.');
+  if (!data?.school) throw new Error(data?.message || 'Pendaftaran akaun sekolah gagal.');
+  return data.school;
+};
 const listSchools = async () => unwrap(await getSupabase().from('esipk_schools').select('id,display_name').order('display_name'));
 const schoolByName = async (name) => {
   const rows = await listSchools();
@@ -73,7 +81,11 @@ const runGas = async (name, ...args) => {
     }
     case 'deleteKuartersData': unwrap(await client.from('esipk_quarters').delete().eq('id', first).select('id').single()); return true;
     case 'addSchool': unwrap(await client.from('esipk_schools').insert({ display_name: first })); return runGas('getSchools');
-    case 'editSchool': unwrap(await client.from('esipk_schools').update({ display_name: second }).eq('display_name', first).select('id').single()); return runGas('getSchools');
+    case 'editSchool': {
+      const parsed = parseSchoolStr(second);
+      unwrap(await client.from('esipk_schools').update({ display_name: second, school_code: parsed.code || null }).eq('display_name', first).select('id').single());
+      return runGas('getSchools');
+    }
     case 'deleteSchool': unwrap(await client.from('esipk_schools').delete().eq('display_name', first).select('id').single()); return runGas('getSchools');
     case 'resetSchools': throw new Error('Tetapan semula sekolah tidak tersedia. Urus sekolah satu persatu.');
     case 'simpanImejKerosakan': return { success: true, url: storageReference('esipk-damage', await uploadAttachment(first, 'esipk-damage')) };
