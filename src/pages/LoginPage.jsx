@@ -1,5 +1,6 @@
 function LoginPage() {
   const { statusMessage, fetchInitialData, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, loading, handleLogin } = useAppContext();
+  const [showPassword, setShowPassword] = React.useState(false);
   return (
 
           <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden">
@@ -61,7 +62,10 @@ function LoginPage() {
                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-2">Kata Laluan</label>
                       <div className="relative">
                         <span className="absolute inset-y-0 left-0 flex items-center pl-5 text-slate-400"><Icons.Lock className="w-5 h-5" /></span>
-                        <input aria-label="Kata Laluan" autoComplete="current-password" type="password" required disabled={loading} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-sm" placeholder="••••••••" />
+                        <input aria-label="Kata Laluan" autoComplete="current-password" type={showPassword ? "text" : "password"} required disabled={loading} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} className="w-full pl-12 pr-14 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-sm" placeholder="••••••••" />
+                        <button type="button" aria-label={showPassword ? "Sembunyikan kata laluan" : "Papar kata laluan"} disabled={loading} onClick={() => setShowPassword(prev => !prev)} className="absolute inset-y-0 right-0 flex items-center pr-5 text-slate-400 hover:text-indigo-600 disabled:opacity-50 transition-colors">
+                          <Icons.Eye className="w-5 h-5" />
+                        </button>
                       </div>
                     </div>
                     <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl text-sm font-bold transition-all shadow-[0_20px_40px_-10px_rgba(79,70,229,0.5)] mt-4 flex items-center justify-center gap-2">
