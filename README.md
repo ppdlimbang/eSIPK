@@ -7,8 +7,11 @@ School quarters management for PPD Limbang. The separated React pages now use Su
 - Supabase project: `https://jluqnqqtwdnfccadbzxp.supabase.co`
 - GitHub repository: `https://github.com/ppdlimbang/eSIPK`
 - App preview: `http://localhost:8000/esipk_dashboard.html`
+- GitHub Pages deployment: `https://ppdlimbang.github.io/eSIPK/` after Pages is enabled
 
 The repository's existing `index.html` still embeds the Apps Script version. The Supabase app is `esipk_dashboard.html`; the existing live entry page has not been replaced. Data is not automatically migrated from Apps Script or the earlier browser preview.
+
+GitHub Pages deploys the Supabase version from the `supabase-setup` branch through `.github/workflows/deploy-pages.yml`. Enable Pages with the GitHub Actions source once; each later push to that branch publishes a fresh build.
 
 ## Development
 
