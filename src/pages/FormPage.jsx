@@ -44,19 +44,21 @@ function FormPage() {
                       <button
                         key={i}
                         onClick={() => { setActiveSchool(school); setFormData(prev => ({...prev, namaSekolah: school})); }}
-                        className={`relative flex items-center gap-4 border hover:shadow-md hover:-translate-y-1 rounded-2xl p-4 transition-all focus:outline-none focus:ring-4 group overflow-hidden ${hasSubmitted ? 'bg-emerald-50/40 border-emerald-200 hover:border-emerald-500 focus:ring-emerald-500/20' : 'bg-slate-50 border-slate-200 hover:border-indigo-500 focus:ring-indigo-500/20'}`}
+                        className={`relative flex items-start gap-3 sm:gap-4 border hover:shadow-md hover:-translate-y-1 rounded-2xl p-4 transition-all focus:outline-none focus:ring-4 group overflow-hidden min-h-[116px] ${hasSubmitted ? 'bg-emerald-50/40 border-emerald-200 hover:border-emerald-500 focus:ring-emerald-500/20' : 'bg-slate-50 border-slate-200 hover:border-indigo-500 focus:ring-indigo-500/20'}`}
                       >
-                        <div className={`h-12 w-12 rounded-xl shadow-sm flex items-center justify-center shrink-0 transition-colors ${hasSubmitted ? 'bg-emerald-100 text-emerald-600 border border-emerald-200 group-hover:bg-emerald-200' : 'bg-white text-indigo-500 border border-slate-100 group-hover:bg-indigo-50 group-hover:text-indigo-600'}`}><Icons.School /></div>
-                        <div className="flex flex-col text-left pr-4">
-                          <span className={`font-semibold text-sm line-clamp-2 leading-tight transition-colors ${hasSubmitted ? 'text-emerald-800 group-hover:text-emerald-900' : 'text-slate-700 group-hover:text-indigo-700'}`}>{name}</span>
+                        <div className={`h-11 w-11 sm:h-12 sm:w-12 mt-1 rounded-xl shadow-sm flex items-center justify-center shrink-0 transition-colors ${hasSubmitted ? 'bg-emerald-100 text-emerald-600 border border-emerald-200 group-hover:bg-emerald-200' : 'bg-white text-indigo-500 border border-slate-100 group-hover:bg-indigo-50 group-hover:text-indigo-600'}`}><Icons.School /></div>
+                        <div className="min-w-0 flex-1 flex flex-col text-left pt-0.5">
+                          <div className="min-h-[24px] mb-1 flex justify-end">
+                            {hasSubmitted && (
+                              <span className="bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap" title={`${schoolSubmissions.length} Unit Direkodkan`}>
+                                <Icons.CheckCircle2 className="w-3 h-3" /> {schoolSubmissions.length} Unit
+                              </span>
+                            )}
+                          </div>
+                          <span className={`font-semibold text-sm line-clamp-3 leading-tight transition-colors break-words ${hasSubmitted ? 'text-emerald-800 group-hover:text-emerald-900' : 'text-slate-700 group-hover:text-indigo-700'}`}>{name}</span>
                           {code && <span className={`text-[10px] font-bold tracking-widest uppercase mt-0.5 transition-colors ${hasSubmitted ? 'text-emerald-500 group-hover:text-emerald-600' : 'text-slate-400 group-hover:text-indigo-400'}`}>{code}</span>}
                           {hasSubmitted && latestUpdateDate && <span className="text-[9px] font-bold text-emerald-600/70 mt-1">Kemaskini: {latestUpdateDate}</span>}
                         </div>
-                        {hasSubmitted && (
-                          <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-bl-xl shadow-sm flex items-center gap-1.5" title={`${schoolSubmissions.length} Unit Direkodkan`}>
-                            <Icons.CheckCircle2 className="w-3 h-3" /> {schoolSubmissions.length} Unit
-                          </div>
-                        )}
                       </button>
                       );
                     })}
