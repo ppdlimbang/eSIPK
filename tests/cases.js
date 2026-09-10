@@ -2,6 +2,11 @@
   assert(parseSchoolStr('FLAT PENDIDIKAN').name === 'FLAT PENDIDIKAN', 'Uncoded school retained');
   assert(!isSchoolMatch('YBA1234 SK CONTOH', ''), 'Blank school cannot match');
   assert(!isSchoolMatch('YBA1234 SK CONTOH', 'YBA5678 SK CONTOH 2'), 'Different schools stay isolated');
+  assert(getSpecialSchoolOptions('YEA5101 SEKOLAH MENENGAH KEBANGSAAN SERI PATIAMBUN').includes('Rumah Pengetua'), 'Full imported SMK Seri Patiambun name gets special quarters');
+  assert(getSpecialSchoolOptions('YEA5102 SEKOLAH MENENGAH KEBANGSAAN KUBONG').includes('Rumah PK HEM'), 'Full imported SMK Kubong name gets special quarters');
+  assert(getSpecialSchoolOptions('YEB5101 SEKOLAH MENENGAH KEBANGSAAN MEDAMIT').includes('Flat Lama E'), 'Full imported SMK Medamit name gets special quarters');
+  assert(getSpecialSchoolOptions('YEE5101 SEKOLAH MENENGAH KEBANGSAAN LIMBANG').includes('Flat Junior'), 'Full imported SMK Limbang name gets special quarters');
+  assert(getSpecialSchoolOptions('YRA5101 SEKOLAH MENENGAH KEBANGSAAN AGAMA LIMBANG').includes('Flat C'), 'Full imported SMK Agama Limbang name gets special quarters');
   const vacant = normalizeOccupancy({ statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3, noKP: 'private', bilik1Status: 'Diisi', bilik1Penghuni: 'Name', ketuaRumah: 'bilik1' });
   assert(vacant.noKP === '' && vacant.bilik1Penghuni === '' && vacant.ketuaRumah === '', 'Vacancy clears personal data');
   assert(normalizeOccupancy({ statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3, bilik1Status: 'Rosak' }).bilik1Status === 'Rosak', 'Vacancy retains damage');

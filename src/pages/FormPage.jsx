@@ -1,6 +1,7 @@
 function FormPage() {
   const { authUser, view, submissions, schools, loading, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, roleFilteredSubmissions, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleDeleteRow, inputClass, isSpecialSchool } = useAppContext();
   const schoolRecords = useMemo(() => roleFilteredSubmissions.filter(row => isSchoolMatch(row.namaSekolah, activeSchool)), [roleFilteredSubmissions, activeSchool]);
+  const activeSpecialOptions = getSpecialSchoolOptions(activeSchool);
   return (
 <>
             {view === 'form' && !activeSchool && authUser?.type === 'admin' && (
@@ -138,7 +139,7 @@ function FormPage() {
                              <label htmlFor="formpage-field-1" className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Nama Bangunan <span className="text-rose-500">*</span></label>
                              <select id="formpage-field-1" value={namaBangunanDipilih} onChange={(e) => setNamaBangunanDipilih(e.target.value)} required className={inputClass}>
                                <option value="" disabled>-- Sila Pilih --</option>
-                               {specialSchoolOptions[parseSchoolStr(activeSchool).name.toLowerCase()].map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                               {activeSpecialOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                              </select>
                            </div>
                            <div>
