@@ -9,7 +9,7 @@
   assert(getSpecialSchoolOptions('YRA5101 SEKOLAH MENENGAH KEBANGSAAN AGAMA LIMBANG').includes('Flat C'), 'Full imported SMK Agama Limbang name gets special quarters');
   const vacant = normalizeOccupancy({ statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3, noKP: 'private', bilik1Status: 'Diisi', bilik1Penghuni: 'Name', ketuaRumah: 'bilik1' });
   assert(vacant.noKP === '' && vacant.bilik1Penghuni === '' && vacant.ketuaRumah === '', 'Vacancy clears personal data');
-  assert(normalizeOccupancy({ statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3, bilik1Status: 'Rosak' }).bilik1Status === 'Rosak', 'Vacancy retains damage');
+  assert(normalizeOccupancy({ statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3, bilik1Status: 'Rosak' }).bilik1Status === 'Kosong', 'Vacancy clears shared room status');
   render(); await settle();
   assert(queryCount === 0, 'No database requests before authentication');
   assert(!model.loading && !model.isAuthenticated, 'Login ready without session');
@@ -25,6 +25,11 @@
   const record = model.submissions[0];
   model.handleEditRow(record); render(); model.navigate('form'); render();
   assert(model.editingRecordId === record.id, 'Active form navigation retains edit ID');
+  model.handleChange({ target: { name: 'bilik1Status', value: 'Diisi', type: 'select-one' } }); render();
+  model.handleChange({ target: { name: 'bilik1Penghuni', value: 'Nama Bilik', type: 'text' } }); render();
+  model.handleChange({ target: { name: 'namaPenghuni', value: 'Nama Utama', type: 'text' } }); render();
+  model.handleChange({ target: { name: 'statusHunian', value: 'Tidak Berpenghuni', type: 'radio' } }); render();
+  assert(model.formData.bilik1Status === 'Kosong' && model.formData.bilik1Penghuni === '' && model.formData.namaPenghuni === '', 'Vacant status clears occupancy fields immediately');
   model.handleChange({ target: { name: 'namaKuarters', value: 'Updated', type: 'text' } }); render();
   authListener('SIGNED_IN', activeSession); await settle();
   assert(model.editingRecordId === record.id && model.formData.namaKuarters === 'Updated', 'Repeated Auth events preserve unsaved form');

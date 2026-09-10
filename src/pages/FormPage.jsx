@@ -197,24 +197,30 @@ function FormPage() {
                     <h3 className="text-base font-bold text-slate-900 mb-2 flex items-center gap-3">
                       <div className="h-6 w-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">2</div> Perincian Bilik Kongsi
                     </h3>
-                    <p className="text-sm font-medium text-slate-500 mb-8 border-b border-indigo-100/50 pb-4 ml-9">Isi sekiranya unit dikongsi bersama pegawai bujang lain. Maksimum tiga penghuni bilik direkodkan; bilik tambahan termasuk dalam jumlah bilik sahaja.</p>
-                    <div className="space-y-5">
-                      {['bilik1', 'bilik2', 'bilik3'].slice(0, Math.min(3, Number(formData.bilanganBilik) || 3)).map((bilik, idx) => (
-                        <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start bg-white/60 p-5 rounded-2xl border border-indigo-100/40 shadow-sm">
-                          <div className="sm:col-span-2 pt-3"><span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Bilik {idx + 1}</span></div>
-                          <div className="sm:col-span-4"><select name={`${bilik}Status`} value={formData[`${bilik}Status`]} onChange={handleChange} className={inputClass}><option value="Kosong">Sedia Didiami</option><option value="Diisi">Berpenghuni</option><option value="Rosak">Rosak / Tutup</option></select></div>
-                          <div className="sm:col-span-6">
-                            <input type="text" name={`${bilik}Penghuni`} value={formData[`${bilik}Penghuni`]} onChange={handleChange} disabled={formData[`${bilik}Status`] !== 'Diisi'} placeholder={formData[`${bilik}Status`] === 'Diisi' ? "Nama Penghuni..." : "Tidak berkaitan"} className={`${inputClass} ${formData[`${bilik}Status`] !== 'Diisi' ? 'bg-slate-50 border-transparent text-slate-400 shadow-none' : ''}`} />
-                            {formData[`${bilik}Status`] === 'Diisi' && (
-                              <label className="flex items-center gap-2 mt-3 cursor-pointer w-max pl-2">
-                                <input type="checkbox" name="ketuaRumah" value={bilik} checked={formData.ketuaRumah === bilik} onChange={(e) => { if (e.target.checked) setFormData(prev => ({ ...prev, ketuaRumah: bilik })); else setFormData(prev => ({ ...prev, ketuaRumah: '' })); }} className="w-4 h-4 text-indigo-600 rounded border-indigo-300 focus:ring-indigo-500" />
-                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">Tandakan Sebagai Ketua Rumah</span>
-                              </label>
-                            )}
+                    <p className="text-sm font-medium text-slate-500 mb-8 border-b border-indigo-100/50 pb-4 ml-9">{formData.statusHunian === 'Berpenghuni' ? 'Isi sekiranya unit dikongsi bersama pegawai bujang lain. Maksimum tiga penghuni bilik direkodkan; bilik tambahan termasuk dalam jumlah bilik sahaja.' : 'Perincian bilik kongsi dikosongkan kerana unit ditanda sebagai Kosong / Tidak Dihuni.'}</p>
+                    {formData.statusHunian === 'Berpenghuni' ? (
+                      <div className="space-y-5">
+                        {['bilik1', 'bilik2', 'bilik3'].slice(0, Math.min(3, Number(formData.bilanganBilik) || 3)).map((bilik, idx) => (
+                          <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start bg-white/60 p-5 rounded-2xl border border-indigo-100/40 shadow-sm">
+                            <div className="sm:col-span-2 pt-3"><span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Bilik {idx + 1}</span></div>
+                            <div className="sm:col-span-4"><select name={`${bilik}Status`} value={formData[`${bilik}Status`]} onChange={handleChange} className={inputClass}><option value="Kosong">Sedia Didiami</option><option value="Diisi">Berpenghuni</option><option value="Rosak">Rosak / Tutup</option></select></div>
+                            <div className="sm:col-span-6">
+                              <input type="text" name={`${bilik}Penghuni`} value={formData[`${bilik}Penghuni`]} onChange={handleChange} disabled={formData[`${bilik}Status`] !== 'Diisi'} placeholder={formData[`${bilik}Status`] === 'Diisi' ? "Nama Penghuni..." : "Tidak berkaitan"} className={`${inputClass} ${formData[`${bilik}Status`] !== 'Diisi' ? 'bg-slate-50 border-transparent text-slate-400 shadow-none' : ''}`} />
+                              {formData[`${bilik}Status`] === 'Diisi' && (
+                                <label className="flex items-center gap-2 mt-3 cursor-pointer w-max pl-2">
+                                  <input type="checkbox" name="ketuaRumah" value={bilik} checked={formData.ketuaRumah === bilik} onChange={(e) => { if (e.target.checked) setFormData(prev => ({ ...prev, ketuaRumah: bilik })); else setFormData(prev => ({ ...prev, ketuaRumah: '' })); }} className="w-4 h-4 text-indigo-600 rounded border-indigo-300 focus:ring-indigo-500" />
+                                  <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">Tandakan Sebagai Ketua Rumah</span>
+                                </label>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-slate-200 bg-white/70 p-5 text-sm font-semibold text-slate-500 flex items-center gap-3">
+                        <Icons.AlertTriangle /> Semua status bilik, nama penghuni bilik dan ketua rumah akan disimpan kosong.
+                      </div>
+                    )}
                   </div>
 
                   {formData.statusHunian === 'Berpenghuni' && (

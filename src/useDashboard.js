@@ -294,6 +294,10 @@ function useDashboard() {
       const handleSubmit = async (e) => {
         e.preventDefault();
         if (loading) return;
+        if (editingRecordId && formData.statusHunian === 'Tidak Berpenghuni') {
+          const confirmed = window.confirm('Unit ini akan disimpan sebagai Kosong / Tidak Dihuni. Perincian Bilik Kongsi dan Maklumat Penghuni Utama akan dikosongkan. Teruskan simpan?');
+          if (!confirmed) return;
+        }
         setLoading(true);
         const currentActiveSchool = String(activeSchool || '');
 

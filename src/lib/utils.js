@@ -9,19 +9,27 @@ const isSchoolMatch = (left, right) => {
   if (a.code && b.code) return a.code === b.code;
   return a.name.toLowerCase() === b.name.toLowerCase();
 };
+const vacantOccupancyFields = {
+  bilik1Status: 'Kosong', bilik1Penghuni: '',
+  bilik2Status: 'Kosong', bilik2Penghuni: '',
+  bilik3Status: 'Kosong', bilik3Penghuni: '',
+  ketuaRumah: '',
+  namaPenghuni: '', noKP: '', jawatan: '', noTelefon: '',
+  stesenBertugas: '', tarikhMendiami: '',
+  statusPerkahwinan: '', warden: ''
+};
+const clearVacantOccupancy = (data) => ({ ...data, ...vacantOccupancyFields });
 const normalizeOccupancy = (data) => {
+  if (data.statusHunian !== 'Berpenghuni') return clearVacantOccupancy(data);
   const result = { ...data };
   const rooms = Math.min(3, Math.max(1, Number(data.bilanganBilik) || 3));
   for (let i = 1; i <= 3; i++) {
     const room = `bilik${i}`;
-    if (i > rooms || (data.statusHunian !== 'Berpenghuni' && result[`${room}Status`] === 'Diisi')) result[`${room}Status`] = 'Kosong';
+    if (i > rooms) result[`${room}Status`] = 'Kosong';
     if (result[`${room}Status`] !== 'Diisi') {
       result[`${room}Penghuni`] = '';
       if (result.ketuaRumah === room) result.ketuaRumah = '';
     }
-  }
-  if (data.statusHunian !== 'Berpenghuni') {
-    ['namaPenghuni', 'noKP', 'jawatan', 'noTelefon', 'stesenBertugas', 'tarikhMendiami', 'statusPerkahwinan', 'warden'].forEach(key => result[key] = '');
   }
   return result;
 };
