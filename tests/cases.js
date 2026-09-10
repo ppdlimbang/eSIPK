@@ -2,6 +2,7 @@
   assert(parseSchoolStr('FLAT PENDIDIKAN').name === 'FLAT PENDIDIKAN', 'Uncoded school retained');
   assert(!isSchoolMatch('YBA1234 SK CONTOH', ''), 'Blank school cannot match');
   assert(!isSchoolMatch('YBA1234 SK CONTOH', 'YBA5678 SK CONTOH 2'), 'Different schools stay isolated');
+  assert(JSON.stringify(getSpecialSchoolOptions('Y050 FLAT PENDIDIKAN')) === JSON.stringify(['Blok A', 'Blok B', 'Blok C']), 'Flat Pendidikan has Blok A, B and C');
   assert(getSpecialSchoolOptions('YEA5101 SEKOLAH MENENGAH KEBANGSAAN SERI PATIAMBUN').includes('Rumah Pengetua'), 'Full imported SMK Seri Patiambun name gets special quarters');
   assert(getSpecialSchoolOptions('YEA5102 SEKOLAH MENENGAH KEBANGSAAN KUBONG').includes('Rumah PK HEM'), 'Full imported SMK Kubong name gets special quarters');
   assert(getSpecialSchoolOptions('YEB5101 SEKOLAH MENENGAH KEBANGSAAN MEDAMIT').includes('Flat Lama E'), 'Full imported SMK Medamit name gets special quarters');

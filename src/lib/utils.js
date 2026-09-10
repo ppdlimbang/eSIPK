@@ -1,6 +1,6 @@
 const parseSchoolStr = (value) => {
   const text = String(value || '').trim();
-  const match = text.match(/^([A-Za-z]{3}\d{4})\s+(?:-\s*)?(.+)$/);
+  const match = text.match(/^([A-Za-z]{3}\d{4}|[A-Za-z]\d{3})\s+(?:-\s*)?(.+)$/);
   return match ? { code: match[1].toUpperCase(), name: match[2].trim() } : { code: '', name: text };
 };
 const isSchoolMatch = (left, right) => {
