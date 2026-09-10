@@ -32,7 +32,7 @@ Deno.serve(async (request) => {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  if (administrator?.role !== "admin" || user.email?.toLowerCase() !== "ppdlimbang@moe.gov.my") return response(403, { message: "Akses pentadbir diperlukan." });
+  if (administrator?.role !== "admin" || user.email?.toLowerCase() !== "admin@moe.gov.my") return response(403, { message: "Akses pentadbir diperlukan." });
 
 
   let payload;
@@ -58,7 +58,7 @@ Deno.serve(async (request) => {
   }
   const { data: target, error: targetError } = await adminClient.auth.admin.getUserById(profiles[0].id);
   if (targetError || !target.user || target.user.id === user.id ||
-      target.user.email?.toLowerCase() === "ppdlimbang@moe.gov.my") {
+      target.user.email?.toLowerCase() === "admin@moe.gov.my") {
     return response(409, { message: "Akaun sekolah tidak sah." });
   }
   const values = { display_name: schoolCode + " " + schoolName, school_code: schoolCode, account_email: email };

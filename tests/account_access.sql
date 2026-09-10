@@ -1,6 +1,6 @@
 begin;
 insert into auth.users(id,email) values
- ('00000000-0000-0000-0000-000000000001','ppdlimbang@moe.gov.my'),
+ ('00000000-0000-0000-0000-000000000001','admin@moe.gov.my'),
  ('00000000-0000-0000-0000-000000000002','other@example.com');
 insert into public.esipk_profiles(id,role) values
  ('00000000-0000-0000-0000-000000000001','admin'),

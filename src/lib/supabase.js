@@ -1,5 +1,5 @@
 let supabaseClient;
-const isSettingsAdmin = (user) => user?.type === 'admin' && user.email?.toLowerCase() === 'ppdlimbang@moe.gov.my';
+const isSettingsAdmin = (user) => user?.type === 'admin' && user.email?.toLowerCase() === 'admin@moe.gov.my';
 const getSupabase = () => {
   if (!window.supabase) throw new Error('Sambungan Supabase gagal dimuatkan. Sila muat semula halaman.');
   if (!supabaseClient) supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.publishableKey, {

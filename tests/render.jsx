@@ -14,7 +14,7 @@ const cases = [
   ['School selection', FormPage, { view: 'form', authUser: { type: 'admin' }, schools: [sample.namaSekolah], submissions: [sample] }, 'Pilih Sekolah Anda'],
   ['Record form', FormPage, { view: 'form', activeSchool: sample.namaSekolah, roleFilteredSubmissions: [sample], authUser: { type: 'school' }, formData: sample }, 'Rekod Kuarters Semasa'],
   ['Downloads', DownloadsPage, { view: 'muatTurun', filesList: [] }, 'Pusat Muat Turun'],
-  ['Settings', SettingsPage, { view: 'settings', authUser: { type: 'admin', email: 'ppdlimbang@moe.gov.my' }, schools: [sample.namaSekolah] }, 'Tetapan Konfigurasi'],
+  ['Settings', SettingsPage, { view: 'settings', authUser: { type: 'admin', email: 'admin@moe.gov.my' }, schools: [sample.namaSekolah] }, 'Tetapan Konfigurasi'],
   ['Unit details', UnitDetails, { selectedUnit: sample }, 'role="dialog"']
 ];
 for (const [name, Component, overrides, expected] of cases) {
@@ -31,7 +31,7 @@ for (const user of [{ type: 'school', email: 'school@example.com' }, { type: 'ad
   if (html.includes('Urus Pangkalan Sekolah')) throw new Error('Unauthorized settings content rendered');
 }
 const editHtml = ReactDOMServer.renderToStaticMarkup(<Fixture component={SettingsPage} overrides={{
-  view: 'settings', authUser: {type: 'admin', email: 'ppdlimbang@moe.gov.my'},
+  view: 'settings', authUser: {type: 'admin', email: 'admin@moe.gov.my'},
   schools: [sample.namaSekolah], editingSchool: sample.namaSekolah,
   editSchoolEmail: 'school@example.com', editSchoolPassword: ''
 }} />);

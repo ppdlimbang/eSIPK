@@ -32,7 +32,7 @@ Deno.serve(async (request) => {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  if (administrator?.role !== "admin" || user.email?.toLowerCase() !== "ppdlimbang@moe.gov.my") return response(403, { message: "Akses pentadbir diperlukan." });
+  if (administrator?.role !== "admin" || user.email?.toLowerCase() !== "admin@moe.gov.my") return response(403, { message: "Akses pentadbir diperlukan." });
 
   let payload: { schoolName?: string; schoolCode?: string; email?: string; password?: string };
   try { payload = await request.json(); }

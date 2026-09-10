@@ -27,7 +27,7 @@ const createClient = () => ({
 });
 /* FUNCTION */
 function reset() {
-  caller = {id:'admin', email:'ppdlimbang@moe.gov.my'}; role = 'admin'; failAuth = false; updates = []; writes = 0;
+  caller = {id:'admin', email:'admin@moe.gov.my'}; role = 'admin'; failAuth = false; updates = []; writes = 0;
   school = {id:schoolId,display_name:'OLD School',school_code:'OLD',account_email:'old@example.com',account_editing:false};
 }
 const payload = {schoolId,schoolName:'School Updated',schoolCode:'NEW',email:'new@example.com',password:''};

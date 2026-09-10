@@ -141,7 +141,7 @@ def main():
     report = []
     try:
         password = getpass.getpass('PPD administrator password: ')
-        session = client.request('/auth/v1/token?grant_type=password', {'email': 'ppdlimbang@moe.gov.my', 'password': password})
+        session = client.request('/auth/v1/token?grant_type=password', {'email': 'admin@moe.gov.my', 'password': password})
         del password
         client.token = session['access_token']
         uid = session['user']['id']

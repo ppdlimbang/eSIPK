@@ -2,10 +2,10 @@
 
 ## Kemas kini akaun sekolah (10 September 2026)
 
-1. Selepas migrasi 001 dan 002, jalankan keseluruhan `supabase/migrations/202609100003_school_account_edit.sql` sekali dalam SQL Editor untuk mengetatkan akses kemas kini terus jadual sekolah.
+1. Selepas migrasi 001 dan 002, jalankan keseluruhan `supabase/migrations/202609100003_school_account_edit.sql` sekali dalam SQL Editor untuk mengetatkan akses kemas kini terus jadual sekolah. Jika emel pentadbir ditukar kepada `admin@moe.gov.my`, jalankan juga `supabase/migrations/202609100004_admin_email.sql`.
 2. Kemas kini kod Edge Function **create-school-account** menggunakan fail `supabase/functions/create-school-account/index.ts`, kemudian deploy semula.
 3. Cipta Edge Function bernama tepat **update-school-account**. Tampal keseluruhan `supabase/functions/update-school-account/index.ts` ke dalam editor **index.ts**. Masukkan nama fungsi dalam kotak **Function name**, kemudian klik **Deploy function**.
-4. Log masuk sebagai `ppdlimbang@moe.gov.my` dengan profil `admin`. Di Tetapan, klik ikon edit sekolah. Isi nama, kod dan e-mel; isi kata laluan baharu hanya jika hendak menukarnya. Klik Simpan.
+4. Log masuk sebagai `admin@moe.gov.my` dengan profil `admin`. Di Tetapan, klik ikon edit sekolah. Isi nama, kod dan e-mel; isi kata laluan baharu hanya jika hendak menukarnya. Klik Simpan.
 5. Uji log masuk sekolah menggunakan maklumat baharu. Akaun sekolah tidak melihat Tetapan dan pautan `#/settings` akan dialihkan ke Dashboard.
 
 Sekolah mesti mempunyai tepat satu profil akaun sekolah yang dipautkan. Rekod kuarters kekal dipautkan melalui ID sekolah walaupun nama atau kod berubah. Kata laluan lama tidak boleh dipaparkan.
@@ -32,7 +32,7 @@ Jika semakan betul, jalankan import sebenar:
 python3 tools/import_school_accounts.py "Emel Rasmi Sekolah PPD Limbang.xlsx" --apply --report local-import/import-result.json
 ```
 
-Skrip akan meminta kata laluan pentadbir `ppdlimbang@moe.gov.my`. Kata laluan sekolah dijana sementara dalam memori mengikut nama ringkas sekolah dan kod sekolah, kemudian dihantar kepada Edge Function. Laporan dalam `local-import/` tidak menyimpan kata laluan dan tidak dimasukkan ke GitHub.
+Skrip akan meminta kata laluan pentadbir `admin@moe.gov.my`. Kata laluan sekolah dijana sementara dalam memori mengikut nama ringkas sekolah dan kod sekolah, kemudian dihantar kepada Edge Function. Laporan dalam `local-import/` tidak menyimpan kata laluan dan tidak dimasukkan ke GitHub.
 
 Ujian formula nama sekolah:
 
