@@ -2,7 +2,17 @@ const AppContext = React.createContext(null);
 const useAppContext = () => React.useContext(AppContext);
 function App() {
   const model = useDashboard();
-  const { view, authUser, loading, statusMessage, handleLogout } = model;
+  const { view, authUser, authReady, loading, statusMessage, handleLogout } = model;
+  if (!authReady) return (
+    <AppContext.Provider value={model}>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="bg-white px-8 py-6 rounded-3xl shadow-xl border border-slate-100 flex flex-col items-center gap-4">
+          <div className="h-8 w-8 border-4 border-yellow-100 border-t-yellow-500 rounded-full animate-spin"></div>
+          <span className="text-sm font-bold text-slate-800 tracking-wide">Memuatkan sesi...</span>
+        </div>
+      </div>
+    </AppContext.Provider>
+  );
   if (!model.isAuthenticated) return <AppContext.Provider value={model}><LoginPage /></AppContext.Provider>;
       return (
         <AppContext.Provider value={model}>
