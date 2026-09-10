@@ -56,8 +56,10 @@ create policy documents_read on public.esipk_documents for select to authenticat
 create policy documents_insert on public.esipk_documents for insert to authenticated with check (public.esipk_is_admin());
 create policy documents_delete on public.esipk_documents for delete to authenticated using (public.esipk_is_admin());
 create function public.esipk_validate_quarter() returns trigger language plpgsql set search_path = '' as $$
+declare previous_justification text := '';
 begin
-  if not public.esipk_is_admin() and coalesce(new.data->>'justifikasiPPD', '') <> case when TG_OP = 'INSERT' then '' else coalesce(old.data->>'justifikasiPPD', '') end then
+  if TG_OP = 'UPDATE' then previous_justification := coalesce(old.data->>'justifikasiPPD', ''); end if;
+  if not public.esipk_is_admin() and coalesce(new.data->>'justifikasiPPD', '') <> previous_justification then
     raise exception 'Only administrators can edit PPD justification';
   end if;
   if TG_OP = 'UPDATE' then new.created_at := old.created_at; end if;
