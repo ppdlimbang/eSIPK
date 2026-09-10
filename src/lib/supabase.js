@@ -61,6 +61,18 @@ const listRecords = async () => {
 };
 const listDocuments = async () => unwrap(await getSupabase().from('esipk_documents').select('*').order('created_at', { ascending: false }))
   .map(row => ({ id: row.id, tajuk: row.title, namaFail: row.file_name, url: 'storage://esipk-documents/' + row.path }));
+const listActivityLogs = async () => unwrap(await getSupabase().from('esipk_activity_logs')
+  .select('id, action, summary, changes, created_at, esipk_schools(display_name)')
+  .order('created_at', { ascending: false })
+  .limit(20))
+  .map(row => ({
+    id: row.id,
+    action: row.action,
+    summary: row.summary,
+    changes: row.changes || [],
+    createdAtDate: row.created_at,
+    namaSekolah: row.esipk_schools?.display_name || ''
+  }));
 const storageReference = (bucket, path) => 'storage://' + bucket + '/' + path;
 const resolveAttachmentUrl = async (value) => {
   if (!value?.startsWith('storage://')) return /^https:\/\//i.test(value || '') ? value : '';
@@ -87,6 +99,7 @@ const runGas = async (name, ...args) => {
     case 'getSchools': return (await listSchools()).map(row => row.display_name);
     case 'getKuartersData': return listRecords();
     case 'getFilesList': return listDocuments();
+    case 'getActivityLogs': return listActivityLogs();
     case 'saveKuartersData': case 'updateKuartersData': {
       const data = { ...(name === 'saveKuartersData' ? first : second) };
       const school = await schoolByName(data.namaSekolah);

@@ -2,7 +2,8 @@ const fixtures = {
   esipk_schools: [{ id: 'school-a', display_name: 'YBA1234 SK CONTOH' }, { id: 'school-b', display_name: 'YBA5678 SK CONTOH 2' }],
   esipk_profiles: [{ id: 'user-a', role: 'school', school_id: 'school-a' }, { id: 'admin', role: 'admin', school_id: null }],
   esipk_quarters: [{ id: 'record-a', school_id: 'school-a', data: { namaKuarters: 'Unit A', statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3 }, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }],
-  esipk_documents: []
+  esipk_documents: [],
+  esipk_activity_logs: [{ id: 'log-a', school_id: 'school-a', quarter_id: 'record-a', action: 'update', summary: 'Perubahan rekod: Unit A', changes: [{ field: 'statusHunian', before: 'Berpenghuni', after: 'Tidak Berpenghuni' }], created_at: '2024-01-02T00:00:00Z' }]
 };
 let queryCount = 0, failNextMutation = false, authListener, activeSession = null;
 const mockAuth = {
@@ -18,6 +19,7 @@ function mockQuery(table) {
   let action = 'read', values, filters = [], single = false, range = [0, Infinity];
   const query = {
     select() { return query; }, order() { return query; },
+    limit(count) { range = [range[0], Math.min(range[1], count - 1)]; return query; },
     range(a, b) { range = [a, b]; return query; },
     eq(key, value) { filters.push(row => row[key] === value); return query; },
     single() { single = true; return query; },

@@ -1,5 +1,5 @@
 function DashboardPage() {
-  const { authUser, view, schools, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, setSelectedUnit, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, exportToPDF } = useAppContext();
+  const { authUser, view, schools, activityLogs, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, setSelectedUnit, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, exportToPDF } = useAppContext();
   const [page, setPage] = useState(1);
   const pageSize = 25;
   const pageCount = Math.max(1, Math.ceil(filteredSubmissions.length / pageSize));
@@ -36,6 +36,47 @@ function DashboardPage() {
                     <div><p className="text-4xl font-extrabold text-rose-700">{unoccupiedUnits}</p><p className="text-xs font-bold text-rose-400 uppercase tracking-widest mt-2">Unit Kekosongan</p></div>
                   </div>
                 </div>
+
+                {authUser?.type === 'admin' && (
+                  <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">
+                    <div className="p-6 sm:p-8 border-b border-indigo-50/50 flex items-start justify-between gap-4 bg-indigo-50/30">
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-900">Notifikasi Aktiviti Sekolah</h3>
+                        <p className="text-xs font-semibold text-slate-500 mt-1">Paparan admin sahaja untuk pengisian baharu dan perubahan yang dibuat oleh sekolah.</p>
+                      </div>
+                      <span className="bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">{(activityLogs || []).length} terkini</span>
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                      {(!activityLogs || activityLogs.length === 0) ? (
+                        <div className="p-6 text-sm font-medium text-slate-400">Belum ada aktiviti sekolah direkodkan.</div>
+                      ) : (
+                        activityLogs.slice(0, 8).map((log) => (
+                          <div key={log.id} className="p-5 sm:p-6 flex flex-col lg:flex-row lg:items-start gap-4 hover:bg-slate-50/60 transition-colors">
+                            <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${log.action === 'insert' ? 'bg-emerald-50 text-emerald-600' : 'bg-yellow-50 text-yellow-600'}`}>
+                              {log.action === 'insert' ? <Icons.Plus className="w-5 h-5" /> : <Icons.Edit3 className="w-5 h-5" />}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                <p className="font-bold text-slate-900">{log.summary}</p>
+                                <span className="text-[11px] font-bold text-slate-400">{formatDateTimeString(log.createdAtDate)}</span>
+                              </div>
+                              <p className="text-xs font-semibold text-indigo-600 mt-1">{parseSchoolStr(log.namaSekolah).name || log.namaSekolah}</p>
+                              {Array.isArray(log.changes) && log.changes.length > 0 && (
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  {log.changes.slice(0, 4).map((change, index) => (
+                                    <span key={index} className="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg">
+                                      {change.field}: {change.before ? `${change.before} → ` : ''}{change.after || 'Kosong'}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="mt-8 mb-6">
                   <div className="flex justify-between items-end mb-4">

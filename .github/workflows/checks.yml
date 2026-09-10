@@ -47,5 +47,6 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202609100002_school_accounts.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202609100003_school_account_edit.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202609100004_admin_email.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202609100005_activity_logs.sql
       - run: psql -v ON_ERROR_STOP=1 -f tests/rls.sql
       - run: psql -v ON_ERROR_STOP=1 -f tests/account_access.sql

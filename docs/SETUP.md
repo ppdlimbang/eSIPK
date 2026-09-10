@@ -2,7 +2,7 @@
 
 ## Kemas kini akaun sekolah (10 September 2026)
 
-1. Selepas migrasi 001 dan 002, jalankan keseluruhan `supabase/migrations/202609100003_school_account_edit.sql` sekali dalam SQL Editor untuk mengetatkan akses kemas kini terus jadual sekolah. Jika emel pentadbir ditukar kepada `admin@moe.gov.my`, jalankan juga `supabase/migrations/202609100004_admin_email.sql`.
+1. Selepas migrasi 001 dan 002, jalankan keseluruhan `supabase/migrations/202609100003_school_account_edit.sql` sekali dalam SQL Editor untuk mengetatkan akses kemas kini terus jadual sekolah. Jika emel pentadbir ditukar kepada `admin@moe.gov.my`, jalankan juga `supabase/migrations/202609100004_admin_email.sql`. Untuk notifikasi aktiviti sekolah kepada admin, jalankan `supabase/migrations/202609100005_activity_logs.sql`.
 2. Kemas kini kod Edge Function **create-school-account** menggunakan fail `supabase/functions/create-school-account/index.ts`, kemudian deploy semula.
 3. Cipta Edge Function bernama tepat **update-school-account**. Tampal keseluruhan `supabase/functions/update-school-account/index.ts` ke dalam editor **index.ts**. Masukkan nama fungsi dalam kotak **Function name**, kemudian klik **Deploy function**.
 4. Log masuk sebagai `admin@moe.gov.my` dengan profil `admin`. Di Tetapan, klik ikon edit sekolah. Isi nama, kod dan e-mel; isi kata laluan baharu hanya jika hendak menukarnya. Klik Simpan.

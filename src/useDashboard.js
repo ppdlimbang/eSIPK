@@ -13,6 +13,7 @@ function useDashboard() {
       const [submissions, setSubmissions] = useState([]);
       const [schools, setSchools] = useState([]);
       const [filesList, setFilesList] = useState([]);
+      const [activityLogs, setActivityLogs] = useState([]);
 
       const [newSchoolCode, setNewSchoolCode] = useState('');
       const [newSchoolName, setNewSchoolName] = useState('');
@@ -52,14 +53,15 @@ function useDashboard() {
         const version = ++requestVersion.current;
         setLoading(true);
         try {
-          const results = await Promise.allSettled([
-            runGas('getKuartersData'), runGas('getSchools'), runGas('getFilesList')
-          ]);
+          const tasks = [runGas('getKuartersData'), runGas('getSchools'), runGas('getFilesList')];
+          if (authUser?.type === 'admin') tasks.push(runGas('getActivityLogs'));
+          const results = await Promise.allSettled(tasks);
           if (version !== requestVersion.current) return;
-          const setters = [setSubmissions, setSchools, setFilesList];
+          const setters = [setSubmissions, setSchools, setFilesList, setActivityLogs];
           results.forEach((result, index) => {
             if (result.status === 'fulfilled' && Array.isArray(result.value)) setters[index](result.value.filter(Boolean));
           });
+          if (authUser?.type !== 'admin') setActivityLogs([]);
           if (results.some(result => result.status === 'rejected')) showStatus('error', 'Sebahagian data gagal dimuatkan. Sila cuba muat semula.');
         } finally {
           if (version === requestVersion.current) setLoading(false);
@@ -76,7 +78,7 @@ function useDashboard() {
           activeUserId = null;
           requestVersion.current++;
           setIsAuthenticated(false); setAuthUser(null);
-          setSubmissions([]); setSchools([]); setFilesList([]); setSelectedUnit(null);
+          setSubmissions([]); setSchools([]); setFilesList([]); setActivityLogs([]); setSelectedUnit(null);
           setFormData(initialFormState); setEditingRecordId(null); setGambarFiles([]);
           setSelectedSchoolFilter('Semua'); setStatusFilter('Semua'); setKondisiFilter('Semua'); setSearchTerm('');
           if (!session?.user) { setLoading(false); setAuthReady(true); return; }
@@ -104,7 +106,7 @@ function useDashboard() {
         } catch (error) { setLoginError(error.message); setLoading(false); setAuthReady(true); }
         return () => { cancelled = true; generation++; clearTimeout(timer); subscription?.unsubscribe(); clearTimeout(statusTimer.current); requestVersion.current++; };
       }, []);
-      useEffect(() => { if (isAuthenticated) fetchInitialData(); }, [isAuthenticated]);
+      useEffect(() => { if (isAuthenticated && authUser) fetchInitialData(); }, [isAuthenticated, authUser]);
 
       const navigate = (next) => {
         if (!routeNames.includes(next)) return;
@@ -624,5 +626,5 @@ function useDashboard() {
       const isSpecialSchool = Boolean(getSpecialSchoolOptions(activeSchool));
 
 
-  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToPDF, inputClass, isSpecialSchool, navigate };
+  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToPDF, inputClass, isSpecialSchool, navigate };
 }
