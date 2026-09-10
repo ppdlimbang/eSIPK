@@ -39,11 +39,10 @@ function check(value, message) { if (!value) throw new Error(message); }
   reset(); caller.email = 'another@example.com'; check((await call()).status === 403 && writes === 0, 'Other admin blocked');
   reset(); check((await call({...payload,password:'short'})).status === 400 && writes === 0, 'Weak password blocked');
   reset(); check((await call()).status === 200, 'Update succeeds');
-  check(school.school_code === 'NEW' && school.account_email === payload.email && !school.account_editing, 'School synchronized and unlocked');
+  check(school.school_code === 'NEW' && school.account_email === payload.email, 'School synchronized');
   check(!('password' in updates[0].values) && updates[0].id === 'school-user', 'Blank password preserves password and target is linked user');
   reset(); check((await call({...payload,password:'replacement-password'})).status === 200 && updates[0].values.password === 'replacement-password', 'Password reset submitted');
   reset(); failAuth = true; check((await call()).status === 500, 'Auth failure reported');
-  check(school.school_code === 'OLD' && school.account_email === 'old@example.com' && !school.account_editing, 'Auth failure restores school');
-  reset(); school.account_editing = true; check((await call()).status === 409 && updates.length === 0, 'Concurrent account edit blocked');
+  check(school.school_code === 'OLD' && school.account_email === 'old@example.com', 'Auth failure restores school');
   print('PASS account permissions and updates');
 })().catch(error => print('FAIL ' + error.stack));

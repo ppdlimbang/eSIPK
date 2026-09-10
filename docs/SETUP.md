@@ -2,7 +2,7 @@
 
 ## Kemas kini akaun sekolah (10 September 2026)
 
-1. Selepas migrasi 001 dan 002, jalankan keseluruhan `supabase/migrations/202609100003_school_account_edit.sql` sekali dalam SQL Editor.
+1. Selepas migrasi 001 dan 002, jalankan keseluruhan `supabase/migrations/202609100003_school_account_edit.sql` sekali dalam SQL Editor untuk mengetatkan akses kemas kini terus jadual sekolah.
 2. Kemas kini kod Edge Function **create-school-account** menggunakan fail `supabase/functions/create-school-account/index.ts`, kemudian deploy semula.
 3. Cipta Edge Function bernama tepat **update-school-account**. Tampal keseluruhan `supabase/functions/update-school-account/index.ts` ke dalam editor **index.ts**. Masukkan nama fungsi dalam kotak **Function name**, kemudian klik **Deploy function**.
 4. Log masuk sebagai `ppdlimbang@moe.gov.my` dengan profil `admin`. Di Tetapan, klik ikon edit sekolah. Isi nama, kod dan e-mel; isi kata laluan baharu hanya jika hendak menukarnya. Klik Simpan.
@@ -12,7 +12,7 @@ Sekolah mesti mempunyai tepat satu profil akaun sekolah yang dipautkan. Rekod ku
 
 Fungsi mengesahkan pengguna melalui Auth dan menyemak peranan serta e-mel pentadbir sebelum mengubah akaun. Perubahan e-mel/kata laluan menggunakan [Supabase Admin updateUserById](https://supabase.com/docs/reference/javascript/auth-admin-updateuserbyid). Kemas kini langsung jadual sekolah oleh klien disekat supaya perubahan melalui fungsi ini.
 
-Kemas kini Auth dan jadual sekolah melibatkan dua operasi berasingan. Jika Auth menolak kemas kini, fungsi cuba memulihkan rekod sekolah. Jika operasi terganggu atau pemulihan gagal, semak rekod Auth dan sekolah secara manual sebelum melepaskan `account_editing` kepada `false` melalui SQL Editor. Jangan lepaskan kunci ketika permintaan masih berjalan.
+Kemas kini Auth dan jadual sekolah melibatkan dua operasi berasingan. Jika Auth menolak kemas kini, fungsi cuba memulihkan rekod sekolah. Jika operasi terganggu atau pemulihan gagal, semak rekod Auth dan sekolah secara manual sebelum mencuba semula.
 
 Ujian setempat: `python3 tools/test_accounts.py`, `python3 tools/test.py`, `python3 tools/test_render.py`. Ujian polisi SQL dijalankan dalam pangkalan data sementara GitHub Actions; jangan jalankan fail `tests/` pada projek sebenar.
 

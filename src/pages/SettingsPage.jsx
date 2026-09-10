@@ -67,8 +67,8 @@ function SettingsPage() {
                               <label className="text-sm font-semibold">E-mel Sekolah<input type="email" value={editSchoolEmail} onChange={e => setEditSchoolEmail(e.target.value)} className={inputClass} /></label>
                               <label className="text-sm font-semibold">Kata Laluan Baharu<input type="password" autoComplete="new-password" minLength={8} value={editSchoolPassword} onChange={e => setEditSchoolPassword(e.target.value)} placeholder="Kosongkan untuk kekalkan kata laluan" className={inputClass} /></label>
                               <div className="flex w-full sm:w-auto gap-2">
-                                <button onClick={() => handleEditSchoolSave(sekolah)} className="flex-1 sm:flex-none p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-sm flex justify-center items-center" title="Simpan"><Icons.CheckCircle2 className="w-5 h-5" /></button>
-                                <button onClick={() => { setEditingSchool(null); setEditSchoolPassword(''); }} className="flex-1 sm:flex-none p-3 bg-white text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex justify-center items-center" title="Batal"><span className="font-bold">✕</span></button>
+                                <button type="button" onClick={() => handleEditSchoolSave(sekolah)} className="flex-1 sm:flex-none p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-sm flex justify-center items-center" title="Simpan"><Icons.CheckCircle2 className="w-5 h-5" /></button>
+                                <button type="button" onClick={() => { setEditingSchool(null); setEditSchoolPassword(''); }} className="flex-1 sm:flex-none p-3 bg-white text-slate-500 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex justify-center items-center" title="Batal"><span className="font-bold">✕</span></button>
                               </div>
                             </div>
                           );
