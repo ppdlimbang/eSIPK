@@ -6,3 +6,5 @@ __pycache__/
 !.env.example
 supabase/.temp/
 *.pem
+local-import/
+/Emel Rasmi Sekolah PPD Limbang.xlsx

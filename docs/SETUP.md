@@ -16,6 +16,30 @@ Kemas kini Auth dan jadual sekolah melibatkan dua operasi berasingan. Jika Auth 
 
 Ujian setempat: `python3 tools/test_accounts.py`, `python3 tools/test.py`, `python3 tools/test_render.py`. Ujian polisi SQL dijalankan dalam pangkalan data sementara GitHub Actions; jangan jalankan fail `tests/` pada projek sebenar.
 
+## Import direktori sekolah
+
+Fail Excel rasmi sekolah boleh diimport melalui `tools/import_school_accounts.py` selepas fungsi **create-school-account** siap dideploy. Skrip ini menyemak kod sekolah, e-mel dan nama sekolah sebelum mencipta akaun. Sekolah yang sudah wujud akan dilangkau kecuali anda memilih operasi kemas kini secara jelas.
+
+Semak dahulu tanpa mencipta akaun:
+
+```sh
+python3 tools/import_school_accounts.py "Emel Rasmi Sekolah PPD Limbang.xlsx"
+```
+
+Jika semakan betul, jalankan import sebenar:
+
+```sh
+python3 tools/import_school_accounts.py "Emel Rasmi Sekolah PPD Limbang.xlsx" --apply --report local-import/import-result.json
+```
+
+Skrip akan meminta kata laluan pentadbir `ppdlimbang@moe.gov.my`. Kata laluan sekolah dijana sementara dalam memori mengikut nama ringkas sekolah dan kod sekolah, kemudian dihantar kepada Edge Function. Laporan dalam `local-import/` tidak menyimpan kata laluan dan tidak dimasukkan ke GitHub.
+
+Ujian formula nama sekolah:
+
+```sh
+python3 tests/test_school_import.py
+```
+
 The public URL and publishable key are already configured. The project key was verified against Supabase Auth. The database check returned HTTP 404 because the eSIPK tables are not installed yet.
 
 ## 1. Create the tables and access rules

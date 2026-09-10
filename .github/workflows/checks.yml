@@ -17,6 +17,7 @@ jobs:
       - run: python3 tools/test.py
       - run: python3 tools/test_render.py
       - run: python3 tools/test_accounts.py
+      - run: python3 tests/test_school_import.py
       - run: git diff --exit-code -- esipk_dashboard.html
   database:
     runs-on: ubuntu-latest
