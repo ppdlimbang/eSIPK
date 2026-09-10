@@ -37,6 +37,7 @@ function App() {
                 <TopNavLink name="dashboard" label="Dashboard" icon={Icons.LayoutGrid} />
                 <TopNavLink name="form" label="Pengisian" icon={Icons.Edit3} />
                 <TopNavLink name="muatTurun" label="Muat Turun" icon={Icons.Download} />
+                {authUser?.type === 'admin' && <TopNavLink name="logAktiviti" label="Log Aktiviti" icon={Icons.FileText} />}
                 {isSettingsAdmin(authUser) && <TopNavLink name="settings" label="Tetapan" icon={Icons.Sliders} />}
                 <button aria-label="Log Keluar" onClick={handleLogout} className="hidden sm:flex items-center gap-2.5 px-4 sm:px-6 py-3 rounded-full font-bold text-xs sm:text-sm transition-all duration-300 whitespace-nowrap text-rose-500 hover:text-rose-700 hover:bg-rose-50 ml-2">
                   <Icons.LogOut className="w-5 h-5" /> <span className="hidden lg:inline">Log Keluar</span>
@@ -71,6 +72,7 @@ function App() {
             {view === "dashboard" && <DashboardPage />}
             {view === "form" && <FormPage />}
             {view === "muatTurun" && <DownloadsPage />}
+            {view === "logAktiviti" && authUser?.type === 'admin' && <ActivityLogPage />}
             {view === "settings" && isSettingsAdmin(authUser) && <SettingsPage />}
           </main>
 

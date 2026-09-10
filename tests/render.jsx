@@ -14,6 +14,7 @@ const cases = [
   ['School selection', FormPage, { view: 'form', authUser: { type: 'admin' }, schools: [sample.namaSekolah], submissions: [sample] }, 'Pilih Sekolah Anda'],
   ['Record form', FormPage, { view: 'form', activeSchool: sample.namaSekolah, roleFilteredSubmissions: [sample], authUser: { type: 'school' }, formData: sample }, 'Rekod Kuarters Semasa'],
   ['Downloads', DownloadsPage, { view: 'muatTurun', filesList: [] }, 'Pusat Muat Turun'],
+  ['Activity log', ActivityLogPage, { view: 'logAktiviti', authUser: { type: 'admin' }, loginLogs: [{ id: 'login-1', namaSekolah: sample.namaSekolah, email: 'school@example.com', createdAtDate: '2024-01-03T08:00:00Z' }] }, 'Kekerapan Mengikut Sekolah'],
   ['Settings', SettingsPage, { view: 'settings', authUser: { type: 'admin', email: 'admin@moe.gov.my' }, schools: [sample.namaSekolah] }, 'Tetapan Konfigurasi'],
   ['Unit details', UnitDetails, { selectedUnit: sample }, 'role="dialog"']
 ];

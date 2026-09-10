@@ -3,7 +3,8 @@ const fixtures = {
   esipk_profiles: [{ id: 'user-a', role: 'school', school_id: 'school-a' }, { id: 'admin', role: 'admin', school_id: null }],
   esipk_quarters: [{ id: 'record-a', school_id: 'school-a', data: { namaKuarters: 'Unit A', statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3 }, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z' }],
   esipk_documents: [],
-  esipk_activity_logs: [{ id: 'log-a', school_id: 'school-a', quarter_id: 'record-a', action: 'update', summary: 'Perubahan rekod: Unit A', changes: [{ field: 'statusHunian', before: 'Berpenghuni', after: 'Tidak Berpenghuni' }], created_at: '2024-01-02T00:00:00Z' }]
+  esipk_activity_logs: [{ id: 'log-a', school_id: 'school-a', quarter_id: 'record-a', action: 'update', summary: 'Perubahan rekod: Unit A', changes: [{ field: 'statusHunian', before: 'Berpenghuni', after: 'Tidak Berpenghuni' }], created_at: '2024-01-02T00:00:00Z' }],
+  esipk_login_logs: [{ id: 'login-a', school_id: 'school-a', user_id: 'user-a', email: 'school@example.com', created_at: '2024-01-03T00:00:00Z' }]
 };
 let queryCount = 0, failNextMutation = false, authListener, activeSession = null;
 const mockAuth = {

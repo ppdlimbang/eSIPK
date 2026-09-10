@@ -33,7 +33,7 @@ const normalizeOccupancy = (data) => {
   }
   return result;
 };
-const routeNames = ['dashboard', 'form', 'muatTurun', 'settings'];
+const routeNames = ['dashboard', 'form', 'muatTurun', 'logAktiviti', 'settings'];
 const readRoute = () => {
   const route = window.location.hash.replace(/^#\/?/, '');
   return routeNames.includes(route) ? route : 'dashboard';

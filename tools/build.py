@@ -11,7 +11,7 @@ SOURCES = [
     'config.js', 'lib/utils.js', 'lib/api.js', 'lib/supabase.js', 'components/Icons.jsx',
     'components/ErrorBoundary.jsx', 'components/TopNavLink.jsx',
     'useDashboard.js', 'pages/LoginPage.jsx', 'pages/DashboardPage.jsx',
-    'pages/FormPage.jsx', 'pages/DownloadsPage.jsx', 'pages/SettingsPage.jsx',
+    'pages/FormPage.jsx', 'pages/DownloadsPage.jsx', 'pages/ActivityLogPage.jsx', 'pages/SettingsPage.jsx',
     'components/Attachment.jsx', 'components/UnitDetails.jsx', 'App.jsx',
 ]
 

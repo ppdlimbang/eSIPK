@@ -21,8 +21,10 @@
   await model.handleLogin(event); await settle();
   assert(model.isAuthenticated && model.authUser.schoolId === 'school-a', 'Auth profile supplies school identity');
   assert(model.loginPassword === '', 'Password cleared after successful login');
+  assert(fixtures.esipk_login_logs.length === 2, 'School login writes login activity log');
   assert(model.submissions.length === 1, 'Data loads after authentication');
   window.location.hash = '/settings'; render(); assert(model.view === 'dashboard', 'School settings route denied');
+  window.location.hash = '/logAktiviti'; render(); assert(model.view === 'dashboard', 'School activity log route denied');
   const record = model.submissions[0];
   model.handleEditRow(record); render(); model.navigate('form'); render();
   assert(model.editingRecordId === record.id, 'Active form navigation retains edit ID');
@@ -34,6 +36,7 @@
   model.handleChange({ target: { name: 'namaKuarters', value: 'Updated', type: 'text' } }); render();
   authListener('SIGNED_IN', activeSession); await settle();
   assert(model.editingRecordId === record.id && model.formData.namaKuarters === 'Updated', 'Repeated Auth events preserve unsaved form');
+  assert(fixtures.esipk_login_logs.length === 2, 'Repeated signed-in event does not duplicate login log');
   failNextMutation = true;
   await model.handleSubmit(event); await settle();
   assert(fixtures.esipk_quarters[0].data.namaKuarters === 'Unit A', 'Failed write leaves stored record intact');
@@ -45,7 +48,7 @@
   assert(!('createdAtDate' in fixtures.esipk_quarters[0].data), 'Server controls timestamps');
   model.setSelectedUnit(record); model.setStatusFilter('Dihuni'); render();
   await model.handleLogout(); await settle();
-  assert(!model.isAuthenticated && model.submissions.length === 0 && model.selectedUnit === null, 'Logout clears private data');
+  assert(!model.isAuthenticated && model.submissions.length === 0 && model.selectedUnit === null && model.loginLogs.length === 0, 'Logout clears private data');
   assert(model.statusFilter === 'Semua', 'Logout clears filters');
   model.setLoginUsername('admin@example.com'); model.setLoginPassword('test-password'); render();
   await model.handleLogin(event); await settle(); model.navigate('settings'); render();
@@ -55,6 +58,8 @@
   model.setLoginUsername('admin@moe.gov.my'); model.setLoginPassword('test-password'); render();
   await model.handleLogin(event); await settle(); model.navigate('settings'); render();
   assert(model.view === 'settings', 'Designated PPD administrator can open settings');
+  model.navigate('logAktiviti'); render();
+  assert(model.view === 'logAktiviti' && model.loginLogs.length >= 1, 'Admin can open login activity log');
   assert(await resolveAttachmentUrl('javascript:alert(1)') === '', 'Unsafe attachment protocol rejected');
   let rejected = false; try { await runGas('resetSchools'); } catch (_) { rejected = true; }
   assert(rejected, 'Bulk school reset disabled');

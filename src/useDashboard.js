@@ -14,6 +14,7 @@ function useDashboard() {
       const [schools, setSchools] = useState([]);
       const [filesList, setFilesList] = useState([]);
       const [activityLogs, setActivityLogs] = useState([]);
+      const [loginLogs, setLoginLogs] = useState([]);
 
       const [newSchoolCode, setNewSchoolCode] = useState('');
       const [newSchoolName, setNewSchoolName] = useState('');
@@ -54,14 +55,14 @@ function useDashboard() {
         setLoading(true);
         try {
           const tasks = [runGas('getKuartersData'), runGas('getSchools'), runGas('getFilesList')];
-          if (authUser?.type === 'admin') tasks.push(runGas('getActivityLogs'));
+          if (authUser?.type === 'admin') tasks.push(runGas('getActivityLogs'), runGas('getLoginLogs'));
           const results = await Promise.allSettled(tasks);
           if (version !== requestVersion.current) return;
-          const setters = [setSubmissions, setSchools, setFilesList, setActivityLogs];
+          const setters = [setSubmissions, setSchools, setFilesList, setActivityLogs, setLoginLogs];
           results.forEach((result, index) => {
             if (result.status === 'fulfilled' && Array.isArray(result.value)) setters[index](result.value.filter(Boolean));
           });
-          if (authUser?.type !== 'admin') setActivityLogs([]);
+          if (authUser?.type !== 'admin') { setActivityLogs([]); setLoginLogs([]); }
           if (results.some(result => result.status === 'rejected')) showStatus('error', 'Sebahagian data gagal dimuatkan. Sila cuba muat semula.');
         } finally {
           if (version === requestVersion.current) setLoading(false);
@@ -73,12 +74,12 @@ function useDashboard() {
         let timer;
         let subscription;
         let activeUserId;
-        const applySession = async (session) => {
+        const applySession = async (session, event) => {
           const current = ++generation;
           activeUserId = null;
           requestVersion.current++;
           setIsAuthenticated(false); setAuthUser(null);
-          setSubmissions([]); setSchools([]); setFilesList([]); setActivityLogs([]); setSelectedUnit(null);
+          setSubmissions([]); setSchools([]); setFilesList([]); setActivityLogs([]); setLoginLogs([]); setSelectedUnit(null);
           setFormData(initialFormState); setEditingRecordId(null); setGambarFiles([]);
           setSelectedSchoolFilter('Semua'); setStatusFilter('Semua'); setKondisiFilter('Semua'); setSearchTerm('');
           if (!session?.user) { setLoading(false); setAuthReady(true); return; }
@@ -92,6 +93,9 @@ function useDashboard() {
             setFormData({ ...initialFormState, namaSekolah: profile.schoolData || '' });
             setLoginError('');
             setAuthReady(true);
+            if (event === 'SIGNED_IN' && profile.type === 'school') {
+              recordLoginLog(profile).catch(() => {});
+            }
           } catch (error) {
             if (!cancelled && generation === current) { setLoginError(error.message || 'Akaun belum diberi akses.'); setLoading(false); setAuthReady(true); }
           }
@@ -101,7 +105,7 @@ function useDashboard() {
             // Do database work outside the Auth callback to avoid its session lock.
             if (event === 'TOKEN_REFRESHED' || (event === 'SIGNED_IN' && session?.user?.id === activeUserId)) return;
             clearTimeout(timer);
-            timer = setTimeout(() => applySession(session), 0);
+            timer = setTimeout(() => applySession(session, event), 0);
           }).data.subscription;
         } catch (error) { setLoginError(error.message); setLoading(false); setAuthReady(true); }
         return () => { cancelled = true; generation++; clearTimeout(timer); subscription?.unsubscribe(); clearTimeout(statusTimer.current); requestVersion.current++; };
@@ -110,6 +114,7 @@ function useDashboard() {
 
       const navigate = (next) => {
         if (!routeNames.includes(next)) return;
+        if (next === 'logAktiviti' && authUser?.type !== 'admin') return;
         if (next === 'settings' && !isSettingsAdmin(authUser)) return;
         if (view === next) return;
         window.location.hash = '/' + next;
@@ -117,7 +122,7 @@ function useDashboard() {
       useEffect(() => {
         const syncRoute = () => {
           let next = readRoute();
-          if (isAuthenticated && next === 'settings' && !isSettingsAdmin(authUser)) {
+          if (isAuthenticated && ((next === 'settings' && !isSettingsAdmin(authUser)) || (next === 'logAktiviti' && authUser?.type !== 'admin'))) {
             next = 'dashboard';
             window.location.replace('#/dashboard');
           }
@@ -148,7 +153,7 @@ function useDashboard() {
         try { await signOut(); }
         catch (error) { showStatus('error', 'Log keluar gagal. Sila cuba lagi.'); return; }
         requestVersion.current++;
-        setSubmissions([]); setSchools([]); setFilesList([]); setLoading(false);
+        setSubmissions([]); setSchools([]); setFilesList([]); setActivityLogs([]); setLoginLogs([]); setLoading(false);
         setIsAuthenticated(false);
         setAuthUser(null);
         setLoginUsername('');
@@ -626,5 +631,5 @@ function useDashboard() {
       const isSpecialSchool = Boolean(getSpecialSchoolOptions(activeSchool));
 
 
-  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToPDF, inputClass, isSpecialSchool, navigate };
+  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToPDF, inputClass, isSpecialSchool, navigate };
 }
