@@ -115,7 +115,7 @@ function FormPage() {
                            {sub.statusHunian === 'Berpenghuni' ? (
                              <div className="bg-white border border-slate-100 p-3 rounded-xl mt-3"><p className="text-xs font-semibold text-slate-700">{String(sub.namaPenghuni || '')}</p><p className="text-[10px] text-slate-500 truncate">{String(sub.jawatan || '')}</p></div>
                            ) : (
-                             <div className="bg-white border border-slate-100 p-3 rounded-xl mt-3"><p className="text-[10px] text-slate-400 font-bold uppercase">Kondisi</p><p className="text-xs font-semibold text-rose-600 mt-0.5">{String(sub.statusFizikalKuarters || '')}</p></div>
+                             <div className="bg-white border border-slate-100 p-3 rounded-xl mt-3"><p className="text-[10px] text-slate-400 font-bold uppercase">Kondisi</p><p className="text-xs font-semibold text-rose-600 mt-0.5">{formatConditionStatus(sub.statusFizikalKuarters)}</p></div>
                            )}
                          </div>
                        ))}
@@ -253,7 +253,7 @@ function FormPage() {
                         <select id="formpage-field-16" name="statusFizikalKuarters" value={formData.statusFizikalKuarters} onChange={handleChange} className={inputClass}>
                           <option value="Baik">Baik (Sedia Diduduki)</option>
                           <option value="Rosak Ringan">Rosak Ringan (Pembaikan Biasa)</option>
-                          <option value="Rosak Berat">Kerosakan Kritikal (Tidak Selamat)</option>
+                          <option value="Kerosakan Kritikal">Kerosakan Kritikal (Tidak Selamat)</option>
                           <option value="Sedang Diselenggara">Sedang Dibaiki</option>
                         </select>
                       </div>

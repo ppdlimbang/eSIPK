@@ -64,7 +64,7 @@ const readRoute = () => {
       };
 
 
-      const formatDateTimeString = (dateObj) => {
+const formatDateTimeString = (dateObj) => {
         if (!dateObj) return '-';
         const d = new Date(dateObj);
         if (isNaN(d.getTime())) return '-';
@@ -74,6 +74,16 @@ const readRoute = () => {
         const hours = String(d.getHours()).padStart(2, '0');
         const minutes = String(d.getMinutes()).padStart(2, '0');
         return `${day}/${month}/${year} ${hours}:${minutes}`;
+      };
+
+      const criticalDamageStatus = 'Kerosakan Kritikal';
+      const legacyCriticalDamageStatus = ['Rosak', 'Berat'].join(' ');
+      const isCriticalDamageStatus = (value) => [criticalDamageStatus, legacyCriticalDamageStatus].includes(String(value || ''));
+      const formatConditionStatus = (value) => isCriticalDamageStatus(value) ? criticalDamageStatus : String(value || '');
+      const isConditionMatch = (value, filter) => {
+        if (filter === 'Semua') return true;
+        if (filter === criticalDamageStatus) return isCriticalDamageStatus(value);
+        return String(value || '') === filter;
       };
 
 

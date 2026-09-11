@@ -65,7 +65,7 @@ function DashboardPage() {
                                 <div className="mt-3 flex flex-wrap gap-2">
                                   {log.changes.slice(0, 4).map((change, index) => (
                                     <span key={index} className="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg">
-                                      {change.field}: {change.before ? `${change.before} → ` : ''}{change.after || 'Kosong'}
+                                      {change.field}: {change.before ? `${formatConditionStatus(change.before)} → ` : ''}{formatConditionStatus(change.after) || 'Kosong'}
                                     </span>
                                   ))}
                                 </div>
@@ -97,8 +97,8 @@ function DashboardPage() {
                        <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rosak Ringan</p><p className="text-2xl font-extrabold text-yellow-600 mt-1">{kondisiRosakRingan}</p></div>
                        <div className="h-10 w-10 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-500"><Icons.AlertTriangle className="w-5 h-5"/></div>
                      </div>
-                     <div onClick={() => setKondisiFilter(prev => prev === 'Rosak Berat' ? 'Semua' : 'Rosak Berat')} className={`p-5 rounded-2xl shadow-sm flex items-center justify-between cursor-pointer transition-all hover:-translate-y-1 ${kondisiFilter === 'Rosak Berat' ? 'bg-rose-50/80 border-2 border-rose-400 ring-4 ring-rose-500/10' : 'bg-white border border-rose-100 hover:border-rose-300'}`}>
-                       <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rosak Berat</p><p className="text-2xl font-extrabold text-rose-600 mt-1">{kondisiRosakBerat}</p></div>
+                     <div onClick={() => setKondisiFilter(prev => prev === criticalDamageStatus ? 'Semua' : criticalDamageStatus)} className={`p-5 rounded-2xl shadow-sm flex items-center justify-between cursor-pointer transition-all hover:-translate-y-1 ${kondisiFilter === criticalDamageStatus ? 'bg-rose-50/80 border-2 border-rose-400 ring-4 ring-rose-500/10' : 'bg-white border border-rose-100 hover:border-rose-300'}`}>
+                       <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kerosakan Kritikal</p><p className="text-2xl font-extrabold text-rose-600 mt-1">{kondisiRosakBerat}</p></div>
                        <div className="h-10 w-10 bg-rose-50 rounded-full flex items-center justify-center text-rose-500"><Icons.AlertTriangle className="w-5 h-5"/></div>
                      </div>
                      <div onClick={() => setKondisiFilter(prev => prev === 'Sedang Diselenggara' ? 'Semua' : 'Sedang Diselenggara')} className={`p-5 rounded-2xl shadow-sm flex items-center justify-between cursor-pointer transition-all hover:-translate-y-1 ${kondisiFilter === 'Sedang Diselenggara' ? 'bg-blue-50/80 border-2 border-blue-400 ring-4 ring-blue-500/10' : 'bg-white border border-blue-100 hover:border-blue-300'}`}>
@@ -179,7 +179,7 @@ function DashboardPage() {
                                   <div className={`h-2 w-2 rounded-full ${sub.statusHunian === 'Berpenghuni' ? 'bg-emerald-500' : 'bg-yellow-400'}`}></div>
                                   <span className="font-semibold text-slate-800 text-sm">{String(sub.statusHunian || '')}</span>
                                 </div>
-                                <div className="text-[11px] font-bold text-slate-500 mt-1.5 p-1.5 bg-slate-50 rounded-lg inline-block border border-slate-100">{String(sub.statusFizikalKuarters || '')}</div>
+                                <div className="text-[11px] font-bold text-slate-500 mt-1.5 p-1.5 bg-slate-50 rounded-lg inline-block border border-slate-100">{formatConditionStatus(sub.statusFizikalKuarters)}</div>
                                 {(sub.projekNRDA === true || String(sub.projekNRDA).toUpperCase() === 'TRUE' || sub.projekNRDA === 'Ya') && <div className="text-[11px] font-bold text-indigo-500 mt-1.5 ml-2 p-1.5 bg-indigo-50 rounded-lg inline-block border border-indigo-100">Projek NRDA</div>}
                               </td>
                               <td className="px-6 py-5">

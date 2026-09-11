@@ -190,8 +190,7 @@ function useDashboard() {
       }), [roleFilteredSubmissions, searchTerm, selectedSchoolFilter, statusFilter]);
 
       const filteredSubmissions = useMemo(() => baseFilteredSubmissions.filter(sub => {
-        if (kondisiFilter === 'Semua') return true;
-        return String(sub.statusFizikalKuarters) === kondisiFilter;
+        return isConditionMatch(sub.statusFizikalKuarters, kondisiFilter);
       }), [baseFilteredSubmissions, kondisiFilter]);
 
       const totalUnits = useMemo(() => filteredSubmissions.reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [filteredSubmissions]);
@@ -200,7 +199,7 @@ function useDashboard() {
 
       const kondisiBaik = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Baik').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
       const kondisiRosakRingan = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Rosak Ringan').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
-      const kondisiRosakBerat = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Rosak Berat').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
+      const kondisiRosakBerat = useMemo(() => baseFilteredSubmissions.filter(s => isCriticalDamageStatus(s?.statusFizikalKuarters)).reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
       const kondisiDiselenggara = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Sedang Diselenggara').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
 
       const showStatus = (type, text) => {
@@ -265,7 +264,7 @@ function useDashboard() {
           bilik3Status: record.bilik3Status || 'Kosong', bilik3Penghuni: record.bilik3Penghuni || '', ketuaRumah: record.ketuaRumah || '',
           namaPenghuni: record.namaPenghuni || '', noKP: record.noKP || '', jawatan: record.jawatan || '', noTelefon: record.noTelefon || '',
           stesenBertugas: record.stesenBertugas || '', statusPerkahwinan: record.statusPerkahwinan || 'Bujang', warden: record.warden || 'Tidak',
-          tarikhMendiami: parsedTarikh, statusFizikalKuarters: record.statusFizikalKuarters || 'Baik',
+          tarikhMendiami: parsedTarikh, statusFizikalKuarters: formatConditionStatus(record.statusFizikalKuarters) || 'Baik',
           justifikasi: record.justifikasi || '', justifikasiPPD: record.justifikasiPPD || '', gambarKerosakan: record.gambarKerosakan || '',
           projekNRDA: record.projekNRDA === true || record.projekNRDA === 'TRUE' || String(record.projekNRDA).toUpperCase() === 'TRUE' || record.projekNRDA === 'Ya' || false
         });
@@ -605,7 +604,7 @@ function useDashboard() {
 
             return [
               i + 1, String(sub.namaSekolah || '-'), `${String(sub.namaKuarters || '-')}\n(${String(sub.jenisRumah || '-')})\nTahun: ${String(sub.tahunDibina || '-')}`,
-              String(sub.statusHunian || '-'), String(sub.statusFizikalKuarters || '-'), bilikStr,
+              String(sub.statusHunian || '-'), formatConditionStatus(sub.statusFizikalKuarters) || '-', bilikStr,
               isBp ? String(sub.namaPenghuni || '-') : 'KOSONG', isBp ? String(sub.noKP || '-') : '-', isBp ? String(sub.jawatan || '-') : '-', catatan
             ];
           });

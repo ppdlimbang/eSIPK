@@ -8,6 +8,9 @@
   assert(getSpecialSchoolOptions('YEB5101 SEKOLAH MENENGAH KEBANGSAAN MEDAMIT').includes('Flat Lama E'), 'Full imported SMK Medamit name gets special quarters');
   assert(getSpecialSchoolOptions('YEE5101 SEKOLAH MENENGAH KEBANGSAAN LIMBANG').includes('Flat Junior'), 'Full imported SMK Limbang name gets special quarters');
   assert(getSpecialSchoolOptions('YRA5101 SEKOLAH MENENGAH KEBANGSAAN AGAMA LIMBANG').includes('Flat D'), 'Full imported SMK Agama Limbang name gets Flat D special quarters');
+  const oldCriticalLabel = ['Rosak', 'Berat'].join(' ');
+  assert(formatConditionStatus(oldCriticalLabel) === criticalDamageStatus, 'Legacy critical damage label displays with current wording');
+  assert(isConditionMatch(oldCriticalLabel, criticalDamageStatus), 'Legacy critical damage records match current filter');
   const vacant = normalizeOccupancy({ statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3, noKP: 'private', bilik1Status: 'Diisi', bilik1Penghuni: 'Name', ketuaRumah: 'bilik1' });
   assert(vacant.noKP === '' && vacant.bilik1Penghuni === '' && vacant.ketuaRumah === '', 'Vacancy clears personal data');
   assert(normalizeOccupancy({ statusHunian: 'Tidak Berpenghuni', bilanganBilik: 3, bilik1Status: 'Rosak' }).bilik1Status === 'Kosong', 'Vacancy clears shared room status');

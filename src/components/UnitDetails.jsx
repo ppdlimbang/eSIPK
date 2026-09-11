@@ -36,7 +36,7 @@ function UnitDetails() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 shadow-sm"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Pengisian</p><p className="text-sm font-bold text-slate-900 mt-2">{String(selectedUnit.statusHunian || '')}</p></div>
-                    <div className="bg-yellow-50/50 p-5 rounded-2xl border border-yellow-100 shadow-sm"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kondisi Fizikal</p><p className="text-sm font-bold text-slate-900 mt-2">{String(selectedUnit.statusFizikalKuarters || '')}</p></div>
+                    <div className="bg-yellow-50/50 p-5 rounded-2xl border border-yellow-100 shadow-sm"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kondisi Fizikal</p><p className="text-sm font-bold text-slate-900 mt-2">{formatConditionStatus(selectedUnit.statusFizikalKuarters)}</p></div>
                   </div>
                   <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
                     <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tahun Dibina</p><p className="text-sm font-bold text-slate-900 mt-2">{String(selectedUnit.tahunDibina || 'Tidak Dinyatakan')}</p></div>
