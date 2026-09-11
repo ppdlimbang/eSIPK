@@ -84,7 +84,7 @@ const readRoute = () => {
         'smk kubong': ['Flat A', 'Flat B', 'Flat C', 'Rumah PK HEM', 'Rumah PKP', 'Rumah Pengetua'],
         'smk medamit': ['Flat Baru A', 'Flat Baru B', 'Flat Baru C', 'Flat Lama D', 'Flat Lama E', 'Kuarters', 'Rumah Pengetua'],
         'smk limbang': ['Flat A', 'Flat B', 'Flat Junior', 'Flat Lama', 'Kuarters', 'Rumah Pengetua'],
-        'smk agama limbang': ['Flat A', 'Flat B', 'Flat C', 'Rumah Pengetua']
+        'smk agama limbang': ['Flat A', 'Flat B', 'Flat C', 'Blok D', 'Rumah Pengetua']
       };
 
       const specialSchoolKey = (school) => formatSchoolName(parseSchoolStr(school).name).toLowerCase().replace(/\s+/g, ' ').trim();
