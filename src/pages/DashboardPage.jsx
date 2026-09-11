@@ -33,7 +33,7 @@ function DashboardPage() {
                   </div>
                   <div className="bg-gradient-to-br from-rose-50/80 to-white p-6 sm:p-8 rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-rose-100 flex flex-col justify-between">
                     <div className="h-12 w-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm border border-rose-100 mb-6"><Icons.AlertTriangle /></div>
-                    <div><p className="text-4xl font-extrabold text-rose-700">{unoccupiedUnits}</p><p className="text-xs font-bold text-rose-400 uppercase tracking-widest mt-2">Unit Kekosongan</p></div>
+                    <div><p className="text-4xl font-extrabold text-rose-700">{unoccupiedUnits}</p><p className="text-xs font-bold text-rose-400 uppercase tracking-widest mt-2">Unit Kosong</p></div>
                   </div>
                 </div>
 
@@ -119,7 +119,7 @@ function DashboardPage() {
                       <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-48 px-5 py-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm">
                         <option value="Semua">Semua Status</option>
                         <option value="Dihuni">Sedang Dihuni</option>
-                        <option value="Kosong">Unit Kekosongan</option>
+                        <option value="Kosong">Unit Kosong</option>
                       </select>
                       {authUser?.type === 'admin' && (
                         <select value={selectedSchoolFilter} onChange={(e) => setSelectedSchoolFilter(e.target.value)} className="w-full sm:w-64 px-5 py-3.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm">
