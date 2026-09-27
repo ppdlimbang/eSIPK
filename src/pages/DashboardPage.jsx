@@ -1,5 +1,5 @@
 function DashboardPage() {
-  const { authUser, view, schools, activityLogs, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, setSelectedUnit, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, exportToPDF } = useAppContext();
+  const { authUser, view, schools, activityLogs, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, setSelectedUnit, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, exportToExcel } = useAppContext();
   const [page, setPage] = useState(1);
   const [showActivityLogs, setShowActivityLogs] = useState(false);
   const pageSize = 25;
@@ -18,7 +18,7 @@ function DashboardPage() {
                   </div>
                   {authUser?.type === 'admin' && (
                     <div className="flex gap-3 w-full md:w-auto">
-                      <button onClick={exportToPDF} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-indigo-600 border border-indigo-700 text-white hover:bg-indigo-700 px-5 py-3 rounded-xl text-sm font-bold shadow-sm transition-all"><Icons.Download /> PDF</button>
+                      <button onClick={exportToExcel} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-indigo-600 border border-indigo-700 text-white hover:bg-indigo-700 px-5 py-3 rounded-xl text-sm font-bold shadow-sm transition-all"><Icons.Download /> Excel</button>
                     </div>
                   )}
                 </div>

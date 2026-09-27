@@ -567,68 +567,88 @@ function useDashboard() {
         } catch (err) { showStatus('error', 'Ralat memadam data.'); await fetchInitialData(); } finally { setLoading(false); }
       };
 
-      const exportToPDF = async () => {
+      const exportToExcel = async () => {
         if (filteredSubmissions.length === 0) { showStatus('error', 'Tiada data.'); return; }
         setLoading(true);
         try {
-          await loadPdfLibraries();
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-
-          doc.setFillColor(79, 70, 229);
-          doc.rect(0, 0, 842, 65, 'F');
-          doc.setTextColor(255, 255, 255);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(14);
-          doc.text('PEJABAT PENDIDIKAN DAERAH LIMBANG, SARAWAK', 40, 28);
-          doc.setFontSize(8.5);
-          doc.setFont('helvetica', 'normal');
-          doc.text('SISTEM PROFIL KUARTERS KEDIAMAN SEKOLAH (eSIPK)', 40, 45);
-
-          doc.setTextColor(15, 23, 42);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(14);
-          doc.text('Dashboard & Data Pengisian Kuarters', 40, 100);
-
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(8);
-          doc.setTextColor(100, 116, 139);
-          doc.text(`Dijana pada: ${new Date().toLocaleDateString('ms-MY')}  |  Rekod: ${totalUnits} Unit`, 40, 118);
-
-          const tableRows = filteredSubmissions.map((sub, i) => {
-            if(!sub) return [];
-            const isBp = sub.statusHunian === 'Berpenghuni';
-            const bilikStr = `B1: ${sub.bilik1Status==='Diisi'?sub.bilik1Penghuni||'Ya':sub.bilik1Status}${sub.ketuaRumah==='bilik1'?' (Ketua)':''}\nB2: ${sub.bilik2Status==='Diisi'?sub.bilik2Penghuni||'Ya':sub.bilik2Status}${sub.ketuaRumah==='bilik2'?' (Ketua)':''}\nB3: ${sub.bilik3Status==='Diisi'?sub.bilik3Penghuni||'Ya':sub.bilik3Status}${sub.ketuaRumah==='bilik3'?' (Ketua)':''}`;
-            let catatan = String(sub.justifikasi || '-');
-            if(sub.gambarKerosakan) catatan += '\n(Ada Gambar Lampiran)';
-
-            return [
-              i + 1, String(sub.namaSekolah || '-'), `${String(sub.namaKuarters || '-')}\n(${String(sub.jenisRumah || '-')})\nTahun: ${String(sub.tahunDibina || '-')}`,
-              String(sub.statusHunian || '-'), formatConditionStatus(sub.statusFizikalKuarters) || '-', bilikStr,
-              isBp ? String(sub.namaPenghuni || '-') : 'KOSONG', isBp ? String(sub.noKP || '-') : '-', isBp ? String(sub.jawatan || '-') : '-', catatan
-            ];
-          });
-
-          doc.autoTable({
-            head: [["Bil.", "Sekolah", "Kuarters / Jenis", "Status", "Kondisi", "Perincian Bilik", "Penghuni Utama", "No. KP", "Jawatan", "Catatan"]],
-            body: tableRows,
-            startY: 135, margin: { left: 40, right: 40 }, theme: 'plain',
-            headStyles: { fillColor: [238, 242, 255], textColor: [67, 56, 202], fontSize: 8, fontStyle: 'bold' },
-            bodyStyles: { fontSize: 7, textColor: [51, 65, 85], cellPadding: 6, borderBottomWidth: 0.5, borderBottomColor: [226, 232, 240] },
-            columnStyles: { 0: { cellWidth: 20, halign: 'center' }, 1: { cellWidth: 90 }, 2: { cellWidth: 90 }, 5: { cellWidth: 70 }, 9: { cellWidth: 110 } },
-            styles: { overflow: 'linebreak' }
-          });
-
-          doc.save(`Laporan_eSIPK_${new Date().toISOString().slice(0,10)}.pdf`);
+          const escapeCell = (value) => {
+            const raw = value === null || value === undefined || value === '' ? '-' : String(value);
+            const safeFormula = /^[=+\-@]/.test(raw) ? `'${raw}` : raw;
+            return safeFormula
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/\n/g, '<br>');
+          };
+          const columns = [
+            'Bil.', 'Sekolah', 'Nama/Label Kuarters', 'Jenis Rumah', 'Tahun Dibina', 'Kapasiti Bilik Utama',
+            'Status Pengisian', 'Bilangan Hunian', 'Kondisi Fizikal', 'Bilik 1 Status', 'Bilik 1 Penghuni',
+            'Bilik 2 Status', 'Bilik 2 Penghuni', 'Bilik 3 Status', 'Bilik 3 Penghuni', 'Ketua Rumah',
+            'Nama Penghuni Utama', 'No. KP', 'Jawatan', 'No. Telefon', 'Stesen Bertugas', 'Status Perkahwinan',
+            'Warden', 'Tarikh Mendiami', 'Justifikasi', 'Gambar Kerosakan', 'Projek NRDA'
+          ];
+          const rows = filteredSubmissions.map((sub, index) => [
+            index + 1,
+            parseSchoolStr(sub.namaSekolah).name || sub.namaSekolah,
+            sub.namaKuarters,
+            sub.jenisRumah,
+            sub.tahunDibina,
+            sub.bilanganBilik,
+            sub.statusHunian,
+            sub.bilanganHunian,
+            formatConditionStatus(sub.statusFizikalKuarters),
+            sub.bilik1Status,
+            sub.bilik1Penghuni,
+            sub.bilik2Status,
+            sub.bilik2Penghuni,
+            sub.bilik3Status,
+            sub.bilik3Penghuni,
+            sub.ketuaRumah,
+            sub.statusHunian === 'Berpenghuni' ? sub.namaPenghuni : '',
+            sub.statusHunian === 'Berpenghuni' ? sub.noKP : '',
+            sub.statusHunian === 'Berpenghuni' ? sub.jawatan : '',
+            sub.statusHunian === 'Berpenghuni' ? sub.noTelefon : '',
+            sub.statusHunian === 'Berpenghuni' ? sub.stesenBertugas : '',
+            sub.statusHunian === 'Berpenghuni' ? sub.statusPerkahwinan : '',
+            sub.statusHunian === 'Berpenghuni' ? sub.warden : '',
+            sub.statusHunian === 'Berpenghuni' ? sub.tarikhMendiami : '',
+            sub.justifikasi,
+            sub.gambarKerosakan,
+            sub.projekNRDA ? 'Ya' : 'Tidak'
+          ]);
+          const generatedAt = new Date().toLocaleString('ms-MY');
+          const head = columns.map((cell) => `<td>${escapeCell(cell)}</td>`).join('');
+          const body = rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeCell(cell)}</td>`).join('')}</tr>`).join('');
+          const html = `<!doctype html><html><head><meta charset="utf-8"><style>
+            table{border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px} th,td{border:1px solid #cbd5e1;padding:6px;vertical-align:top;mso-number-format:'\@'}
+            .title{font-size:16px;font-weight:700;color:#1e1b4b}.meta{color:#64748b;font-size:12px}.head td{background:#eef2ff;font-weight:700;color:#4338ca}
+          </style></head><body>
+            <p class="title">PEJABAT PENDIDIKAN DAERAH LIMBANG, SARAWAK</p>
+            <p class="meta">SISTEM PROFIL KUARTERS KEDIAMAN SEKOLAH (eSIPK)</p>
+            <p class="meta">Dijana pada: ${escapeCell(generatedAt)} | Rekod: ${filteredSubmissions.length} unit</p>
+            <table><tbody><tr class="head">${head}</tr>${body}</tbody></table>
+          </body></html>`;
+          const blob = new window.Blob(['﻿', html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+          const link = document.createElement('a');
+          const url = window.URL.createObjectURL(blob);
+          link.href = url;
+          link.download = `Laporan_eSIPK_${new Date().toISOString().slice(0,10)}.xls`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+          showStatus('success', 'Fail Excel berjaya dijana.');
         } catch (error) {
-          showStatus('error', 'Gagal menjana PDF.');
+          showStatus('error', 'Gagal menjana Excel.');
         } finally { setLoading(false); }
       };
+
 
       const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-3.5 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all shadow-sm";
 
       const isSpecialSchool = Boolean(getSpecialSchoolOptions(activeSchool));
 
 
-  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToPDF, inputClass, isSpecialSchool, navigate };
+  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToExcel, inputClass, isSpecialSchool, navigate };
 }
