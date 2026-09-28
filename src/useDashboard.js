@@ -175,7 +175,7 @@ function useDashboard() {
         setUnitBangunanDipilih('');
       };
 
-      const safeSubmissions = useMemo(() => Array.isArray(submissions) ? submissions.filter(Boolean) : [], [submissions]);
+      const safeSubmissions = useMemo(() => sortSubmissionRecords(Array.isArray(submissions) ? submissions.filter(Boolean) : []), [submissions]);
       const roleFilteredSubmissions = useMemo(() => authUser?.type === 'admin' ? safeSubmissions : safeSubmissions.filter(sub => isSchoolMatch(sub.namaSekolah, authUser?.schoolData)), [safeSubmissions, authUser]);
 
       const baseFilteredSubmissions = useMemo(() => roleFilteredSubmissions.filter(sub => {

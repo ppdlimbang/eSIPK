@@ -99,6 +99,44 @@ const formatDateTimeString = (dateObj) => {
 
       const specialSchoolKey = (school) => formatSchoolName(parseSchoolStr(school).name).toLowerCase().replace(/\s+/g, ' ').trim();
       const getSpecialSchoolOptions = (school) => specialSchoolOptions[specialSchoolKey(school)] || null;
+
+      const naturalCompare = (left, right) => String(left || '').localeCompare(String(right || ''), 'ms', { numeric: true, sensitivity: 'base' });
+      const getSpecialRecordSortInfo = (record) => {
+        const options = getSpecialSchoolOptions(record?.namaSekolah);
+        const name = String(record?.namaKuarters || '').trim();
+        if (!options || !name) return { hasSpecialOrder: false, buildingIndex: 999, unitText: name, unitNumbers: [] };
+        const lowerName = name.toLowerCase();
+        const buildingIndex = options.findIndex((option) => lowerName.startsWith(option.toLowerCase()));
+        const matchedBuilding = buildingIndex >= 0 ? options[buildingIndex] : '';
+        const unitText = matchedBuilding ? name.slice(matchedBuilding.length).replace(/^\s*[-–—:,]*\s*/, '') : name;
+        const unitNumbers = (unitText.match(/\d+/g) || []).map((value) => Number(value));
+        return { hasSpecialOrder: true, buildingIndex: buildingIndex >= 0 ? buildingIndex : 999, unitText, unitNumbers };
+      };
+      const compareUnitNumbers = (leftNumbers, rightNumbers) => {
+        const length = Math.max(leftNumbers.length, rightNumbers.length);
+        for (let i = 0; i < length; i++) {
+          const left = leftNumbers[i] ?? -1;
+          const right = rightNumbers[i] ?? -1;
+          if (left !== right) return left - right;
+        }
+        return 0;
+      };
+      const compareSubmissionRecords = (left, right) => {
+        const leftSchool = parseSchoolStr(left?.namaSekolah);
+        const rightSchool = parseSchoolStr(right?.namaSekolah);
+        const schoolOrder = naturalCompare(leftSchool.name || left?.namaSekolah, rightSchool.name || right?.namaSekolah) || naturalCompare(leftSchool.code, rightSchool.code);
+        if (schoolOrder) return schoolOrder;
+        const leftInfo = getSpecialRecordSortInfo(left);
+        const rightInfo = getSpecialRecordSortInfo(right);
+        if (leftInfo.hasSpecialOrder || rightInfo.hasSpecialOrder) {
+          if (leftInfo.buildingIndex !== rightInfo.buildingIndex) return leftInfo.buildingIndex - rightInfo.buildingIndex;
+          const unitOrder = compareUnitNumbers(leftInfo.unitNumbers, rightInfo.unitNumbers);
+          if (unitOrder) return unitOrder;
+          return naturalCompare(leftInfo.unitText, rightInfo.unitText);
+        }
+        return naturalCompare(left?.namaKuarters, right?.namaKuarters);
+      };
+      const sortSubmissionRecords = (records) => [...(Array.isArray(records) ? records : [])].sort(compareSubmissionRecords);
       const isPpdManagedLocation = (value) => {
         const parsed = typeof value === 'object' ? { code: value.code || '', name: value.name || '' } : parseSchoolStr(value);
         return parsed.code.toUpperCase() === 'Y050' && specialSchoolKey(parsed.name) === 'flat pendidikan';
