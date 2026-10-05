@@ -123,8 +123,8 @@ function DashboardPage() {
                 </div>
 
                 {}
-                <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
-                  <div className="p-6 sm:p-8 border-b border-indigo-50/50 flex flex-col sm:flex-row gap-4 justify-between bg-indigo-50/30">
+                <div className="w-full max-w-[1360px] mx-auto bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+                  <div className="p-4 sm:p-5 border-b border-indigo-50/50 flex flex-col lg:flex-row lg:items-center gap-3 justify-between bg-indigo-50/30">
                     <div className="relative w-full sm:max-w-md">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-indigo-400"><Icons.Search /></span>
                       <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Cari nama, kp, blok..." className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
@@ -144,15 +144,22 @@ function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto p-2 sm:p-4 bg-white">
-                    <table className="w-full text-sm text-left">
+                  <div className="overflow-x-auto px-3 sm:px-5 pb-2 bg-white">
+                    <table className="w-full min-w-[900px] table-fixed text-sm text-left">
+                      <colgroup>
+                        <col className="w-[30%]" />
+                        <col className="w-[27%]" />
+                        <col className="w-[25%]" />
+                        <col className="w-[10%]" />
+                        <col className="w-[8%]" />
+                      </colgroup>
                       <thead>
-                        <tr className="text-slate-400 text-[11px] font-bold uppercase tracking-widest border-b border-slate-50">
-                          <th className="px-6 py-4">Sekolah / Unit</th>
-                          <th className="px-6 py-4">Ketua Rumah</th>
-                          <th className="px-6 py-4">Status & Kondisi</th>
-                          <th className="px-6 py-4">Tahun Dibina</th>
-                          <th className="px-6 py-4 text-center">Tindakan</th>
+                        <tr className="bg-slate-50/60 text-slate-500 text-[10px] font-bold uppercase tracking-wider border-b border-slate-100">
+                          <th scope="col" className="px-4 py-3">Sekolah / Unit</th>
+                          <th scope="col" className="px-4 py-3">Ketua Rumah</th>
+                          <th scope="col" className="px-4 py-3">Status & Kondisi</th>
+                          <th scope="col" className="px-4 py-3">Tahun Dibina</th>
+                          <th scope="col" className="px-4 py-3 text-center">Tindakan</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50">
@@ -173,34 +180,36 @@ function DashboardPage() {
                             }
 
                             return (
-                            <tr key={sub.id} className="hover:bg-slate-50/50 transition-colors group">
-                              <td className="px-6 py-5">
-                                <div className="font-bold text-slate-900">{String(sub.namaSekolah || '')}</div>
-                                <div className="text-xs font-medium text-slate-500 mt-1">{String(sub.namaKuarters || '')} <span className="mx-2 text-slate-300">•</span> {String(sub.jenisRumah || '')}</div>
+                            <tr key={sub.id} className="hover:bg-indigo-50/30 transition-colors group">
+                              <td className="px-4 py-3 align-middle">
+                                <div className="font-semibold text-slate-900 leading-tight">{String(sub.namaSekolah || '')}</div>
+                                <div className="text-xs font-medium text-slate-500 mt-1 leading-snug">{String(sub.namaKuarters || '')}{sub.jenisRumah && <span className="text-slate-400"> · {String(sub.jenisRumah)}</span>}</div>
                               </td>
-                              <td className="px-6 py-5">
+                              <td className="px-4 py-3 align-middle">
                                 {ketuaName ? (
                                   <div>
-                                    <div className="font-semibold text-slate-900 text-xs flex items-center gap-1.5">
-                                      {String(ketuaName)} <span className="bg-yellow-100 text-yellow-800 text-[9px] font-bold px-1.5 py-0.5 rounded-md border border-yellow-200">KETUA</span>
+                                    <div className="font-semibold text-slate-900 text-xs leading-snug flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                                      {String(ketuaName)} <span className="bg-amber-50 text-amber-700 text-[9px] font-bold px-1.5 py-0.5 rounded-md border border-amber-200">KETUA</span>
                                     </div>
-                                    <div className="text-[10px] font-medium text-slate-400 mt-0.5 truncate max-w-[180px]">{String(ketuaRole)}</div>
+                                    <div className="text-[10px] font-medium text-slate-400 mt-0.5 leading-snug">{String(ketuaRole)}</div>
                                   </div>
                                 ) : ( <div className="text-xs text-slate-400 italic font-medium bg-slate-50 px-2 py-1 rounded-md inline-block">Tiada penghuni</div> )}
                               </td>
-                              <td className="px-6 py-5">
-                                <div className="flex items-center gap-2">
-                                  <div className={`h-2 w-2 rounded-full ${sub.statusHunian === 'Berpenghuni' ? 'bg-emerald-500' : 'bg-yellow-400'}`}></div>
-                                  <span className="font-semibold text-slate-800 text-sm">{String(sub.statusHunian || '')}</span>
+                              <td className="px-4 py-3 align-middle">
+                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap font-semibold text-slate-800 text-xs">
+                                    <span className={`h-2 w-2 rounded-full ${sub.statusHunian === 'Berpenghuni' ? 'bg-emerald-500' : 'bg-amber-400'}`}></span>
+                                    {String(sub.statusHunian || '')}
+                                  </span>
+                                  {sub.statusFizikalKuarters && <span className="text-[10px] font-bold text-slate-600 px-2 py-1 bg-slate-100 rounded-md">{formatConditionStatus(sub.statusFizikalKuarters)}</span>}
+                                  {(sub.projekNRDA === true || String(sub.projekNRDA).toUpperCase() === 'TRUE' || sub.projekNRDA === 'Ya') && <span className="text-[10px] font-bold text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md">Projek NRDA</span>}
                                 </div>
-                                <div className="text-[11px] font-bold text-slate-500 mt-1.5 p-1.5 bg-slate-50 rounded-lg inline-block border border-slate-100">{formatConditionStatus(sub.statusFizikalKuarters)}</div>
-                                {(sub.projekNRDA === true || String(sub.projekNRDA).toUpperCase() === 'TRUE' || sub.projekNRDA === 'Ya') && <div className="text-[11px] font-bold text-indigo-500 mt-1.5 ml-2 p-1.5 bg-indigo-50 rounded-lg inline-block border border-indigo-100">Projek NRDA</div>}
                               </td>
-                              <td className="px-6 py-5">
-                                <span className="font-bold text-slate-700">{sub.tahunDibina ? String(sub.tahunDibina) : '-'}</span>
+                              <td className="px-4 py-3 align-middle">
+                                <span className="font-semibold text-slate-700 tabular-nums">{sub.tahunDibina ? String(sub.tahunDibina) : '-'}</span>
                               </td>
-                              <td className="px-6 py-5 text-center">
-                                <button type="button" onClick={() => setSelectedUnit(sub)} className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-xl transition-colors shadow-sm border border-indigo-100" title="Papar Butiran Penuh"><Icons.Eye className="w-5 h-5" /></button>
+                              <td className="px-4 py-3 text-center align-middle">
+                                <button type="button" onClick={() => setSelectedUnit(sub)} className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors border border-indigo-100" title="Papar Butiran Penuh" aria-label="Papar butiran penuh"><Icons.Eye className="w-4 h-4" /></button>
                               </td>
                             </tr>
                             );
