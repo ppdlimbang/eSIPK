@@ -16,6 +16,13 @@ function FormPage() {
                       const { code, name } = parseSchoolStr(school);
                       const schoolSubmissions = (Array.isArray(submissions) ? submissions : []).filter(sub => sub && isSchoolMatch(sub.namaSekolah, school));
                       const hasSubmitted = schoolSubmissions.length > 0;
+                      const schoolUnitSummary = schoolSubmissions.reduce((summary, submission) => {
+                        const quantity = Number(submission?.bilanganHunian) || 1;
+                        summary.total += quantity;
+                        if (submission?.statusHunian === 'Berpenghuni') summary.occupied += quantity;
+                        if (submission?.statusHunian === 'Tidak Berpenghuni') summary.vacant += quantity;
+                        return summary;
+                      }, { total: 0, occupied: 0, vacant: 0 });
 
                       let latestUpdateDate = '';
                       if (hasSubmitted) {
@@ -46,15 +53,21 @@ function FormPage() {
                         className={`relative flex items-center gap-4 border hover:shadow-md hover:-translate-y-1 rounded-2xl p-4 transition-all focus:outline-none focus:ring-4 group overflow-hidden ${hasSubmitted ? 'bg-emerald-50/40 border-emerald-200 hover:border-emerald-500 focus:ring-emerald-500/20' : 'bg-slate-50 border-slate-200 hover:border-indigo-500 focus:ring-indigo-500/20'}`}
                       >
                         <div className={`h-12 w-12 rounded-xl shadow-sm flex items-center justify-center shrink-0 transition-colors ${hasSubmitted ? 'bg-emerald-100 text-emerald-600 border border-emerald-200 group-hover:bg-emerald-200' : 'bg-white text-indigo-500 border border-slate-100 group-hover:bg-indigo-50 group-hover:text-indigo-600'}`}><Icons.School /></div>
-                        <div className="flex flex-col text-left pr-4">
+                        <div className={`flex flex-col text-left pr-4 ${hasSubmitted ? 'pb-7' : ''}`}>
                           <span className={`font-semibold text-sm line-clamp-2 leading-tight transition-colors ${hasSubmitted ? 'text-emerald-800 group-hover:text-emerald-900' : 'text-slate-700 group-hover:text-indigo-700'}`}>{name}</span>
                           {code && <span className={`text-[10px] font-bold tracking-widest uppercase mt-0.5 transition-colors ${hasSubmitted ? 'text-emerald-500 group-hover:text-emerald-600' : 'text-slate-400 group-hover:text-indigo-400'}`}>{code}</span>}
                           {hasSubmitted && latestUpdateDate && <span className="text-[9px] font-bold text-emerald-600/70 mt-1">Kemaskini: {latestUpdateDate}</span>}
                         </div>
                         {hasSubmitted && (
-                          <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-bl-xl shadow-sm flex items-center gap-1.5" title={`${schoolSubmissions.length} Unit Direkodkan`}>
-                            <Icons.CheckCircle2 className="w-3 h-3" /> {schoolSubmissions.length} Unit
-                          </div>
+                          <>
+                            <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-bl-xl shadow-sm flex items-center gap-1.5" title={`${schoolUnitSummary.total} Unit Direkodkan`}>
+                              <Icons.CheckCircle2 className="w-3 h-3" /> {schoolUnitSummary.total} Unit
+                            </div>
+                            <div className="absolute bottom-3 left-[4.5rem] right-3 flex flex-wrap gap-1.5" aria-label={`Status unit: ${schoolUnitSummary.occupied} dihuni, ${schoolUnitSummary.vacant} kosong`}>
+                              <span className="rounded-md bg-emerald-100 px-2 py-1 text-[9px] font-extrabold text-emerald-700">Dihuni: {schoolUnitSummary.occupied}</span>
+                              <span className="rounded-md bg-rose-100 px-2 py-1 text-[9px] font-extrabold text-rose-700">Kosong: {schoolUnitSummary.vacant}</span>
+                            </div>
+                          </>
                         )}
                       </button>
                       );
