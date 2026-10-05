@@ -38,4 +38,4 @@ sandbox.readFile = path => fs.readFileSync(path, 'utf8');
     script = folder / 'driver.js'; script.write_text(driver)
     result = subprocess.run([node or jsc, str(script)], capture_output=True, text=True)
     print(result.stdout, end=''); print(result.stderr, end='')
-    if result.returncode or result.stdout.count('PASS render:') != 7: raise SystemExit(1)
+    if result.returncode or result.stdout.count('PASS render:') != 8: raise SystemExit(1)

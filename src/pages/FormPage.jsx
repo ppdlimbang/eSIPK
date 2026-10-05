@@ -17,6 +17,13 @@ function FormPage() {
                       const { code, name } = parseSchoolStr(school);
                       const schoolSubmissions = (Array.isArray(submissions) ? submissions : []).filter(sub => sub && isSchoolMatch(sub.namaSekolah, school));
                       const hasSubmitted = schoolSubmissions.length > 0;
+                      const schoolUnitSummary = schoolSubmissions.reduce((summary, submission) => {
+                        const quantity = Number(submission?.bilanganHunian) || 1;
+                        summary.total += quantity;
+                        if (submission?.statusHunian === 'Berpenghuni') summary.occupied += quantity;
+                        if (submission?.statusHunian === 'Tidak Berpenghuni') summary.vacant += quantity;
+                        return summary;
+                      }, { total: 0, occupied: 0, vacant: 0 });
 
                       let latestUpdateDate = '';
                       if (hasSubmitted) {
@@ -50,14 +57,20 @@ function FormPage() {
                         <div className="min-w-0 flex-1 flex flex-col text-left pt-0.5">
                           <div className="min-h-[24px] mb-1 flex justify-end">
                             {hasSubmitted && (
-                              <span className="bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap" title={`${schoolSubmissions.length} Unit Direkodkan`}>
-                                <Icons.CheckCircle2 className="w-3 h-3" /> {schoolSubmissions.length} Unit
+                              <span className="bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1.5 whitespace-nowrap" title={`${schoolUnitSummary.total} Unit Direkodkan`}>
+                                <Icons.CheckCircle2 className="w-3 h-3" /> {schoolUnitSummary.total} Unit
                               </span>
                             )}
                           </div>
                           <span className={`font-semibold text-sm line-clamp-3 leading-tight transition-colors break-words ${hasSubmitted ? 'text-emerald-800 group-hover:text-emerald-900' : 'text-slate-700 group-hover:text-indigo-700'}`}>{name}</span>
                           {code && <span className={`text-[10px] font-bold tracking-widest uppercase mt-0.5 transition-colors ${hasSubmitted ? 'text-emerald-500 group-hover:text-emerald-600' : 'text-slate-400 group-hover:text-indigo-400'}`}>{code}</span>}
                           {hasSubmitted && latestUpdateDate && <span className="text-[9px] font-bold text-emerald-600/70 mt-1">Kemaskini: {latestUpdateDate}</span>}
+                          {hasSubmitted && (
+                            <div className="mt-2 flex flex-wrap gap-1.5" aria-label={`Status unit: ${schoolUnitSummary.occupied} dihuni, ${schoolUnitSummary.vacant} kosong`}>
+                              <span className="rounded-md bg-emerald-100 px-2 py-1 text-[9px] font-extrabold text-emerald-700">Dihuni: {schoolUnitSummary.occupied}</span>
+                              <span className="rounded-md bg-rose-100 px-2 py-1 text-[9px] font-extrabold text-rose-700">Kosong: {schoolUnitSummary.vacant}</span>
+                            </div>
+                          )}
                         </div>
                       </button>
                       );

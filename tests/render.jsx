@@ -11,7 +11,10 @@ function Fixture({ component: Component, overrides = {} }) {
 const cases = [
   ['Login', LoginPage, {}, 'Log Masuk'],
   ['Dashboard', DashboardPage, { view: 'dashboard', authUser: { type: 'admin' }, filteredSubmissions: Array.from({ length: 60 }, (_, i) => ({ ...sample, id: 'row-' + i })), kondisiRosakBerat: 7 }, '>7</p>'],
-  ['School selection', FormPage, { view: 'form', authUser: { type: 'admin' }, schools: [sample.namaSekolah], submissions: [sample] }, 'Pilih Sekolah Anda'],
+  ['School selection', FormPage, { view: 'form', authUser: { type: 'admin' }, schools: [sample.namaSekolah], submissions: [
+    { ...sample, bilanganHunian: 2 },
+    { ...sample, id: 'test-2', statusHunian: 'Tidak Berpenghuni', bilanganHunian: 3 }
+  ] }, 'Status unit: 2 dihuni, 3 kosong'],
   ['Record form', FormPage, { view: 'form', activeSchool: sample.namaSekolah, roleFilteredSubmissions: [sample], authUser: { type: 'school' }, formData: sample }, 'Rekod Kuarters Semasa'],
   ['Downloads', DownloadsPage, { view: 'muatTurun', filesList: [] }, 'Pusat Muat Turun'],
   ['Activity log', ActivityLogPage, { view: 'logAktiviti', authUser: { type: 'admin' }, loginLogs: [{ id: 'login-1', namaSekolah: sample.namaSekolah, email: 'school@example.com', createdAtDate: '2024-01-03T08:00:00Z' }] }, 'Kekerapan Mengikut Sekolah'],
