@@ -1,6 +1,9 @@
 function FormPage() {
   const { authUser, view, submissions, schools, loading, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, roleFilteredSubmissions, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleDeleteRow, inputClass, isSpecialSchool } = useAppContext();
+  const [unitStatusFilter, setUnitStatusFilter] = useState('Semua');
   const schoolRecords = useMemo(() => roleFilteredSubmissions.filter(row => isSchoolMatch(row.namaSekolah, activeSchool)), [roleFilteredSubmissions, activeSchool]);
+  const displayedSchoolRecords = useMemo(() => schoolRecords.filter(record => unitStatusFilter === 'Semua' || (unitStatusFilter === 'Dihuni' ? record.statusHunian === 'Berpenghuni' : record.statusHunian === 'Tidak Berpenghuni')), [schoolRecords, unitStatusFilter]);
+  useEffect(() => { setUnitStatusFilter('Semua'); }, [activeSchool]);
   const activeSpecialOptions = getSpecialSchoolOptions(activeSchool);
   return (
 <>
@@ -96,16 +99,22 @@ function FormPage() {
                 </div>
 
                 <div className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 p-6 sm:p-10">
-                  <div className="flex justify-between items-center mb-6 border-b border-slate-50 pb-4">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 border-b border-slate-50 pb-4">
                     <h3 className="text-lg font-bold text-slate-900 flex items-center gap-3"><span className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><Icons.Database /></span> Rekod Kuarters Semasa</h3>
-                    <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg">{schoolRecords.length} Unit</span>
+                    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Tapis status unit">
+                      {[['Semua', 'Semua', 'bg-slate-100 text-slate-700'], ['Dihuni', 'Dihuni', 'bg-emerald-50 text-emerald-700'], ['Kosong', 'Kosong', 'bg-rose-50 text-rose-700']].map(([value, label, color]) => (
+                        <button key={value} type="button" aria-pressed={unitStatusFilter === value} onClick={() => setUnitStatusFilter(value)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${unitStatusFilter === value ? 'border-indigo-400 ring-2 ring-indigo-500/10' : 'border-transparent'} ${color}`}>
+                          {label} <span className="ml-1 opacity-70">{value === 'Semua' ? schoolRecords.length : schoolRecords.filter(record => value === 'Dihuni' ? record.statusHunian === 'Berpenghuni' : record.statusHunian === 'Tidak Berpenghuni').length}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  {schoolRecords.length === 0 ? (
-                     <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-10 text-center"><p className="text-sm font-medium text-slate-500">Tiada rekod kuarters didaftarkan untuk sekolah ini lagi.</p></div>
+                  {displayedSchoolRecords.length === 0 ? (
+                     <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-10 text-center"><p className="text-sm font-medium text-slate-500">{schoolRecords.length === 0 ? 'Tiada rekod kuarters didaftarkan untuk sekolah ini lagi.' : 'Tiada unit sepadan dengan penapis ini.'}</p></div>
                   ) : (
                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                       {schoolRecords.map(sub => (
+                       {displayedSchoolRecords.map(sub => (
                          <div key={sub.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-shadow relative">
                            <div className="absolute top-4 right-4 flex gap-1 z-10">
                              <button type="button" onClick={() => setSelectedUnit(sub)} className="p-2 bg-indigo-600 text-white shadow-md border border-indigo-700 rounded-xl hover:bg-indigo-700 transition-colors" title="Papar"><Icons.Eye className="w-4 h-4" /></button>
