@@ -1,12 +1,23 @@
 function DashboardPage() {
-  const { authUser, view, schools, activityLogs, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, setSelectedUnit, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, exportToExcel } = useAppContext();
+  const { authUser, view, schools, activityLogs, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, setSelectedUnit, setActiveSchool, handleEditRow, navigate, filteredSubmissions, baseFilteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, exportToExcel } = useAppContext();
   const [page, setPage] = useState(1);
   const [showActivityLogs, setShowActivityLogs] = useState(false);
+  const [showPpdReviewOnly, setShowPpdReviewOnly] = useState(false);
   const pageSize = 25;
-  const pageCount = Math.max(1, Math.ceil(filteredSubmissions.length / pageSize));
+  const ppdReviewRows = baseFilteredSubmissions.filter(sub => sub?.statusFizikalKuarters !== 'Baik' && !String(sub?.justifikasiPPD || '').trim());
+  const displayedSubmissions = showPpdReviewOnly ? filteredSubmissions.filter(sub => ppdReviewRows.some(row => row.id === sub.id)) : filteredSubmissions;
+  const ppdReviewUnits = ppdReviewRows.reduce((total, row) => total + (Number(row?.bilanganHunian) || 1), 0);
+  const pageCount = Math.max(1, Math.ceil(displayedSubmissions.length / pageSize));
   const currentPage = Math.min(page, pageCount);
-  const pageRows = filteredSubmissions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  useEffect(() => { setPage(1); }, [searchTerm, selectedSchoolFilter, statusFilter, kondisiFilter]);
+  const pageRows = displayedSubmissions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  useEffect(() => { setPage(1); }, [searchTerm, selectedSchoolFilter, statusFilter, kondisiFilter, showPpdReviewOnly]);
+  const openPpdReview = (record) => {
+    setSelectedUnit(null);
+    setActiveSchool(record.namaSekolah);
+    handleEditRow(record);
+    navigate('form');
+    setTimeout(() => document.getElementById('borang-pengisian')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
+  };
   return (
 <>
             {view === 'dashboard' && (
@@ -122,6 +133,21 @@ function DashboardPage() {
                   </div>
                 </div>
 
+                {authUser?.type === 'admin' && ppdReviewUnits > 0 && (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="h-9 w-9 shrink-0 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><Icons.AlertTriangle className="w-5 h-5" /></div>
+                      <div>
+                        <p className="text-sm font-bold text-amber-900">{ppdReviewUnits} unit memerlukan semakan PPD</p>
+                        <p className="text-xs font-medium text-amber-800/80 mt-0.5">Sekolah memilih tahap selain “Baik” dan belum menerima justifikasi pegawai PPD.</p>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => setShowPpdReviewOnly(value => !value)} className="shrink-0 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors">
+                      {showPpdReviewOnly ? 'Papar semua rekod' : 'Lihat rekod perlu tindakan'}
+                    </button>
+                  </div>
+                )}
+
                 {}
                 <div className="w-full max-w-[1360px] mx-auto bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
                   <div className="p-4 sm:p-5 border-b border-indigo-50/50 flex flex-col lg:flex-row lg:items-center gap-3 justify-between bg-indigo-50/30">
@@ -163,7 +189,7 @@ function DashboardPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50">
-                        {filteredSubmissions.length === 0 ? (
+                        {displayedSubmissions.length === 0 ? (
                           <tr><td colSpan="5" className="px-6 py-16 text-center text-slate-400 font-medium">Tiada data dijumpai.</td></tr>
                         ) : (
                           pageRows.map((sub) => {
@@ -202,6 +228,8 @@ function DashboardPage() {
                                     {String(sub.statusHunian || '')}
                                   </span>
                                   {sub.statusFizikalKuarters && <span className="text-[10px] font-bold text-slate-600 px-2 py-1 bg-slate-100 rounded-md">{formatConditionStatus(sub.statusFizikalKuarters)}</span>}
+                                  {sub.statusFizikalKuarters !== 'Baik' && !String(sub.justifikasiPPD || '').trim() && <button type="button" onClick={() => openPpdReview(sub)} className="text-[10px] font-bold text-amber-700 px-2 py-1 bg-amber-50 rounded-md border border-amber-200 hover:bg-amber-100">Perlu maklum balas PPD</button>}
+                                  {sub.statusFizikalKuarters !== 'Baik' && String(sub.justifikasiPPD || '').trim() && <span className="text-[10px] font-bold text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md">Maklum balas PPD diberi</span>}
                                   {(sub.projekNRDA === true || String(sub.projekNRDA).toUpperCase() === 'TRUE' || sub.projekNRDA === 'Ya') && <span className="text-[10px] font-bold text-indigo-600 px-2 py-1 bg-indigo-50 rounded-md">Projek NRDA</span>}
                                 </div>
                               </td>
@@ -219,7 +247,7 @@ function DashboardPage() {
                     </table>
                   </div>
                   <nav aria-label="Halaman rekod" className="flex items-center justify-between gap-3 p-5 border-t border-slate-100">
-                    <span className="text-sm text-slate-500">{filteredSubmissions.length} rekod • Halaman {currentPage} / {pageCount}</span>
+                    <span className="text-sm text-slate-500">{displayedSubmissions.length} rekod • Halaman {currentPage} / {pageCount}</span>
                     <div className="flex gap-2">
                       <button type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)} className="px-4 py-2 rounded-xl bg-slate-100 disabled:opacity-40">Sebelum</button>
                       <button type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)} className="px-4 py-2 rounded-xl bg-indigo-600 text-white disabled:opacity-40">Seterusnya</button>
