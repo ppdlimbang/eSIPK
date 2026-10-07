@@ -2,6 +2,8 @@ function UnitDetails() {
   const { selectedUnit, setSelectedUnit, authUser, loading, setActiveSchool, handleEditRow, handleRequestImageUpload, handleSavePpdFeedback, navigate } = useAppContext();
   const [ppdFeedback, setPpdFeedback] = useState('');
   const [lightboxUrl, setLightboxUrl] = useState('');
+  const statusKuartersText = String(selectedUnit?.justifikasi || '').trim();
+  const statusKuartersItems = statusKuartersText.match(/(?:^|\s)(\d+)\.\s*.*?(?=\s+\d+\.\s|$)/g)?.map(item => item.trim().replace(/^\d+\.\s*/, '')) || [];
   const openPpdReview = () => {
     setSelectedUnit(null);
     setActiveSchool(selectedUnit.namaSekolah);
@@ -77,7 +79,7 @@ function UnitDetails() {
                     </div>
                   )}
                   {selectedUnit.justifikasi && (
-                    <div className="bg-white p-5 rounded-2xl border border-slate-200"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Kuarters</p><p className="text-sm font-medium text-slate-700 mt-2 leading-relaxed">{String(selectedUnit.justifikasi || '')}</p></div>
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Kuarters</p>{statusKuartersItems.length > 1 ? <ol className="mt-3 space-y-2 list-decimal list-inside">{statusKuartersItems.map((item, index) => <li key={index} className="text-sm font-medium text-slate-700 leading-relaxed">{item}</li>)}</ol> : <p className="text-sm font-medium text-slate-700 mt-2 leading-relaxed">{statusKuartersText}</p>}</div>
                   )}
                   {selectedUnit.statusFizikalKuarters !== 'Baik' && (
                     <div className={`p-5 rounded-2xl border ${selectedUnit.justifikasiPPD ? 'bg-indigo-50 border-indigo-200' : 'bg-amber-50 border-amber-200'}`}>
