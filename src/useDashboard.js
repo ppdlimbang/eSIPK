@@ -698,7 +698,7 @@ function useDashboard() {
             'Status Pengisian', 'Bilangan Hunian', 'Kondisi Fizikal', 'Bilik 1 Status', 'Bilik 1 Penghuni',
             'Bilik 2 Status', 'Bilik 2 Penghuni', 'Bilik 3 Status', 'Bilik 3 Penghuni', 'Ketua Rumah',
             'Nama Penghuni Utama', 'No. KP', 'Jawatan', 'No. Telefon', 'Stesen Bertugas', 'Status Perkahwinan',
-            'Warden', 'Tarikh Mendiami', 'Justifikasi', 'Gambar Kerosakan', 'Projek NRDA'
+            'Warden', 'Tarikh Mendiami', 'Justifikasi', 'Justifikasi PPD', 'Projek NRDA'
           ];
           const rows = filteredSubmissions.map((sub, index) => [
             index + 1,
@@ -726,20 +726,19 @@ function useDashboard() {
             sub.statusHunian === 'Berpenghuni' ? sub.warden : '',
             sub.statusHunian === 'Berpenghuni' ? sub.tarikhMendiami : '',
             sub.justifikasi,
-            sub.gambarKerosakan,
+            sub.justifikasiPPD,
             sub.projekNRDA ? 'Ya' : 'Tidak'
           ]);
           const generatedAt = new Date().toLocaleString('ms-MY');
           const head = columns.map((cell) => `<td>${escapeCell(cell)}</td>`).join('');
-          const body = rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeCell(cell)}</td>`).join('')}</tr>`).join('');
           const html = `<!doctype html><html><head><meta charset="utf-8"><style>
-            table{border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px} th,td{border:1px solid #cbd5e1;padding:6px;vertical-align:top;mso-number-format:'\@'}
-            .title{font-size:16px;font-weight:700;color:#1e1b4b}.meta{color:#64748b;font-size:12px}.head td{background:#eef2ff;font-weight:700;color:#4338ca}
+            body{font-family:Arial,sans-serif;color:#1e293b} table{border-collapse:collapse;font-size:11px;min-width:1800px} th,td{border:1px solid #cbd5e1;padding:7px 8px;vertical-align:top;mso-number-format:'\@'}
+            .title{font-size:16px;font-weight:700;color:#1e1b4b}.meta{color:#64748b;font-size:12px}.head td{background:#eef2ff;font-weight:700;color:#4338ca;white-space:nowrap}.data-row:nth-child(even) td{background:#f8fafc}.data-row:hover td{background:#eef2ff}
           </style></head><body>
             <p class="title">PEJABAT PENDIDIKAN DAERAH LIMBANG, SARAWAK</p>
             <p class="meta">SISTEM PROFIL KUARTERS KEDIAMAN SEKOLAH (eSIPK)</p>
             <p class="meta">Dijana pada: ${escapeCell(generatedAt)} | Rekod: ${filteredSubmissions.length} unit</p>
-            <table><tbody><tr class="head">${head}</tr>${body}</tbody></table>
+            <table><tbody><tr class="head">${head}</tr>${rows.map((row) => `<tr class="data-row">${row.map((cell) => `<td>${escapeCell(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table>
           </body></html>`;
           const blob = new window.Blob(['﻿', html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
           const link = document.createElement('a');
