@@ -1,5 +1,5 @@
 function FormPage() {
-  const { authUser, view, submissions, schools, loading, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, roleFilteredSubmissions, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleDeleteRow, inputClass, isSpecialSchool } = useAppContext();
+  const { authUser, view, submissions, schools, loading, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, roleFilteredSubmissions, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleDeleteRow, handleOccupantMovedOut, inputClass, isSpecialSchool } = useAppContext();
   const [unitStatusFilter, setUnitStatusFilter] = useState('Semua');
   const schoolRecords = useMemo(() => roleFilteredSubmissions.filter(row => isSchoolMatch(row.namaSekolah, activeSchool)), [roleFilteredSubmissions, activeSchool]);
   const displayedSchoolRecords = useMemo(() => schoolRecords.filter(record => unitStatusFilter === 'Semua' || (unitStatusFilter === 'Dihuni' ? record.statusHunian === 'Berpenghuni' : record.statusHunian === 'Tidak Berpenghuni')), [schoolRecords, unitStatusFilter]);
@@ -162,6 +162,9 @@ function FormPage() {
                              <div className="bg-white border border-slate-100 p-3 rounded-xl mt-3"><p className="text-xs font-semibold text-slate-700">{String(sub.namaPenghuni || '')}</p><p className="text-[10px] text-slate-500 truncate">{String(sub.jawatan || '')}</p></div>
                            ) : (
                              <div className="bg-white border border-slate-100 p-3 rounded-xl mt-3"><p className="text-[10px] text-slate-400 font-bold uppercase">Kondisi</p><p className="text-xs font-semibold text-rose-600 mt-0.5">{formatConditionStatus(sub.statusFizikalKuarters)}</p></div>
+                           )}
+                           {sub.statusHunian === 'Berpenghuni' && (authUser?.type === 'admin' || authUser?.type === 'school') && (
+                             <button type="button" onClick={() => handleOccupantMovedOut(sub)} disabled={loading} className="mt-3 w-full rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 transition-colors">Rekod penghuni keluar</button>
                            )}
                            {sub.permintaanGambarPPD === true && !String(sub.gambarKerosakan || '').trim() && <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800">Gambar diperlukan oleh PPD</div>}
                            {String(sub.justifikasiPPD || '').trim() && <div className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-2 text-[10px] font-bold text-indigo-800">Maklum balas PPD tersedia</div>}

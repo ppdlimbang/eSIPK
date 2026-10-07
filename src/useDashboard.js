@@ -46,7 +46,7 @@ function useDashboard() {
         namaSekolah: '', statusHunian: 'Berpenghuni', bilanganHunian: 1, namaKuarters: '', jenisRumah: 'KUARTERS',
         tahunDibina: '', bilanganBilik: '3', bilik1Status: 'Kosong', bilik1Penghuni: '', bilik2Status: 'Kosong', bilik2Penghuni: '',
         bilik3Status: 'Kosong', bilik3Penghuni: '', ketuaRumah: '', namaPenghuni: '', noKP: '', jawatan: '', noTelefon: '',
-        stesenBertugas: '', statusPerkahwinan: 'Bujang', warden: 'Tidak', tarikhMendiami: '', statusFizikalKuarters: 'Baik', justifikasi: '', justifikasiPPD: '', gambarKerosakan: '', permintaanGambarPPD: false, permintaanGambarPPDAt: '', projekNRDA: false
+        stesenBertugas: '', statusPerkahwinan: 'Bujang', warden: 'Tidak', tarikhMendiami: '', statusFizikalKuarters: 'Baik', justifikasi: '', justifikasiPPD: '', gambarKerosakan: '', permintaanGambarPPD: false, permintaanGambarPPDAt: '', sejarahPenghuni: [], projekNRDA: false
       };
       const [formData, setFormData] = useState(initialFormState);
 
@@ -265,7 +265,7 @@ function useDashboard() {
           namaPenghuni: record.namaPenghuni || '', noKP: record.noKP || '', jawatan: record.jawatan || '', noTelefon: record.noTelefon || '',
           stesenBertugas: record.stesenBertugas || '', statusPerkahwinan: record.statusPerkahwinan || 'Bujang', warden: record.warden || 'Tidak',
           tarikhMendiami: parsedTarikh, statusFizikalKuarters: formatConditionStatus(record.statusFizikalKuarters) || 'Baik',
-          justifikasi: record.justifikasi || '', justifikasiPPD: record.justifikasiPPD || '', gambarKerosakan: record.gambarKerosakan || '', permintaanGambarPPD: record.permintaanGambarPPD === true, permintaanGambarPPDAt: record.permintaanGambarPPDAt || '',
+          justifikasi: record.justifikasi || '', justifikasiPPD: record.justifikasiPPD || '', gambarKerosakan: record.gambarKerosakan || '', permintaanGambarPPD: record.permintaanGambarPPD === true, permintaanGambarPPDAt: record.permintaanGambarPPDAt || '', sejarahPenghuni: Array.isArray(record.sejarahPenghuni) ? record.sejarahPenghuni : [],
           projekNRDA: record.projekNRDA === true || record.projekNRDA === 'TRUE' || String(record.projekNRDA).toUpperCase() === 'TRUE' || record.projekNRDA === 'Ya' || false
         });
         setActiveSchool(record.namaSekolah);
@@ -317,6 +317,38 @@ function useDashboard() {
           showStatus('success', 'Maklum balas PPD berjaya disimpan.');
         } catch (error) {
           showStatus('error', error.message || 'Maklum balas PPD gagal disimpan.');
+        } finally { setLoading(false); }
+      };
+
+      const handleOccupantMovedOut = async (record) => {
+        if (loading || !record || record.statusHunian !== 'Berpenghuni') return;
+        if (!window.confirm('Rekod penghuni semasa akan disimpan dalam sejarah dan unit ini ditandakan sebagai Kosong. Teruskan?')) return;
+        setLoading(true);
+        const previousOccupant = {
+          namaPenghuni: String(record.namaPenghuni || ''), noKP: String(record.noKP || ''),
+          jawatan: String(record.jawatan || ''), noTelefon: String(record.noTelefon || ''),
+          stesenBertugas: String(record.stesenBertugas || ''), statusPerkahwinan: String(record.statusPerkahwinan || ''),
+          warden: String(record.warden || ''), tarikhMendiami: String(record.tarikhMendiami || ''),
+          bilik1Status: String(record.bilik1Status || ''), bilik1Penghuni: String(record.bilik1Penghuni || ''),
+          bilik2Status: String(record.bilik2Status || ''), bilik2Penghuni: String(record.bilik2Penghuni || ''),
+          bilik3Status: String(record.bilik3Status || ''), bilik3Penghuni: String(record.bilik3Penghuni || ''),
+          ketuaRumah: String(record.ketuaRumah || ''), tarikhKeluar: new Date().toISOString()
+        };
+        const history = Array.isArray(record.sejarahPenghuni) ? record.sejarahPenghuni : [];
+        const updatedRecord = normalizeOccupancy({
+          ...record,
+          statusHunian: 'Tidak Berpenghuni',
+          sejarahPenghuni: [...history, previousOccupant],
+          updatedAtDate: new Date().toISOString()
+        });
+        try {
+          const result = await runGas('updateKuartersData', record.id, updatedRecord);
+          if (!result) throw new Error('Rekod penghuni keluar gagal disimpan.');
+          setSubmissions(prev => prev.map(item => item.id === record.id ? { ...updatedRecord, id: record.id } : item));
+          setSelectedUnit(null);
+          showStatus('success', 'Penghuni disimpan dalam sejarah dan unit ditandakan sebagai kosong.');
+        } catch (error) {
+          showStatus('error', error.message || 'Gagal merekodkan penghuni keluar.');
         } finally { setLoading(false); }
       };
 
@@ -403,7 +435,7 @@ function useDashboard() {
           noKP: String(formData.noKP || ''), jawatan: String(formData.jawatan || ''), noTelefon: String(formData.noTelefon || ''),
           stesenBertugas: String(formData.stesenBertugas || ''), statusPerkahwinan: String(formData.statusPerkahwinan || ''), warden: String(formData.warden || ''),
           tarikhMendiami: String(formData.tarikhMendiami || ''), statusFizikalKuarters: String(formData.statusFizikalKuarters || ''),
-          justifikasi: String(formData.justifikasi || ''), justifikasiPPD: String(formData.justifikasiPPD || ''), gambarKerosakan: finalGambarKerosakanStr, permintaanGambarPPD: Boolean(finalGambarKerosakanStr ? false : formData.permintaanGambarPPD), permintaanGambarPPDAt: String(formData.permintaanGambarPPDAt || ''), projekNRDA: Boolean(formData.projekNRDA),
+          justifikasi: String(formData.justifikasi || ''), justifikasiPPD: String(formData.justifikasiPPD || ''), gambarKerosakan: finalGambarKerosakanStr, permintaanGambarPPD: Boolean(finalGambarKerosakanStr ? false : formData.permintaanGambarPPD), permintaanGambarPPDAt: String(formData.permintaanGambarPPDAt || ''), sejarahPenghuni: Array.isArray(formData.sejarahPenghuni) ? formData.sejarahPenghuni : [], projekNRDA: Boolean(formData.projekNRDA),
           updatedAtDate: new Date().toISOString(),
           createdAtDate: editingRecordId ? (safeSubmissions.find(row => row.id === editingRecordId)?.createdAtDate || new Date().toISOString()) : new Date().toISOString()
         });
@@ -682,5 +714,5 @@ function useDashboard() {
       const isSpecialSchool = Boolean(getSpecialSchoolOptions(activeSchool));
 
 
-  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRequestImageUpload, handleSavePpdFeedback, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToExcel, inputClass, isSpecialSchool, navigate };
+  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRequestImageUpload, handleSavePpdFeedback, handleOccupantMovedOut, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToExcel, inputClass, isSpecialSchool, navigate };
 }

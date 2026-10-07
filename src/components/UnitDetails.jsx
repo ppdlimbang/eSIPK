@@ -78,6 +78,23 @@ function UnitDetails() {
                       </div>
                     </div>
                   )}
+                  {Array.isArray(selectedUnit.sejarahPenghuni) && selectedUnit.sejarahPenghuni.length > 0 && (
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 shadow-sm">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Sejarah Penghuni</p>
+                      <div className="space-y-3">
+                        {[...selectedUnit.sejarahPenghuni].reverse().map((occupant, index) => (
+                          <div key={`${occupant.tarikhKeluar || ''}-${index}`} className="rounded-xl bg-white border border-slate-100 p-4">
+                            <div className="flex flex-wrap justify-between gap-2">
+                              <p className="text-sm font-bold text-slate-900">{String(occupant.namaPenghuni || 'Nama tidak direkodkan')}</p>
+                              <span className="text-[10px] font-bold text-slate-400">Keluar: {occupant.tarikhKeluar ? formatDateTimeString(occupant.tarikhKeluar) : 'Tidak dinyatakan'}</span>
+                            </div>
+                            {occupant.jawatan && <p className="text-[11px] text-slate-500 mt-1">{String(occupant.jawatan)}</p>}
+                            {occupant.tarikhMendiami && <p className="text-[10px] text-slate-400 mt-2">Mendiami: {String(occupant.tarikhMendiami)}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {selectedUnit.justifikasi && (
                     <div className="bg-white p-5 rounded-2xl border border-slate-200"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Kuarters</p>{statusKuartersItems.length > 1 ? <ol className="mt-3 space-y-2 list-decimal list-inside">{statusKuartersItems.map((item, index) => <li key={index} className="text-sm font-medium text-slate-700 leading-relaxed">{item}</li>)}</ol> : <p className="text-sm font-medium text-slate-700 mt-2 leading-relaxed">{statusKuartersText}</p>}</div>
                   )}
