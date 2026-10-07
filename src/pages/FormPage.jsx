@@ -3,7 +3,13 @@ function FormPage() {
   const [unitStatusFilter, setUnitStatusFilter] = useState('Semua');
   const [occupantExitRecord, setOccupantExitRecord] = useState(null);
   const schoolRecords = useMemo(() => roleFilteredSubmissions.filter(row => isSchoolMatch(row.namaSekolah, activeSchool)), [roleFilteredSubmissions, activeSchool]);
-  const displayedSchoolRecords = useMemo(() => schoolRecords.filter(record => unitStatusFilter === 'Semua' || (unitStatusFilter === 'Dihuni' ? record.statusHunian === 'Berpenghuni' : record.statusHunian === 'Tidak Berpenghuni')), [schoolRecords, unitStatusFilter]);
+  const displayedSchoolRecords = useMemo(() => schoolRecords.filter(record => {
+    if (unitStatusFilter === 'Semua') return true;
+    if (unitStatusFilter === 'Dihuni') return record.statusHunian === 'Berpenghuni';
+    if (unitStatusFilter === 'Kosong') return record.statusHunian === 'Tidak Berpenghuni';
+    if (unitStatusFilter === 'PenghuniKeluar') return Array.isArray(record.sejarahPenghuni) && record.sejarahPenghuni.length > 0;
+    return true;
+  }), [schoolRecords, unitStatusFilter]);
   const pendingImageRequests = useMemo(() => schoolRecords.filter(record => record.permintaanGambarPPD === true && !String(record.gambarKerosakan || '').trim()), [schoolRecords]);
   const ppdFeedbackNotifications = useMemo(() => schoolRecords.filter(record => String(record.justifikasiPPD || '').trim()), [schoolRecords]);
   useEffect(() => { setUnitStatusFilter('Semua'); }, [activeSchool]);
@@ -130,9 +136,9 @@ function FormPage() {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 border-b border-slate-50 pb-4">
                     <h3 className="text-lg font-bold text-slate-900 flex items-center gap-3"><span className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><Icons.Database /></span> Rekod Kuarters Semasa</h3>
                     <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Tapis status unit">
-                      {[['Semua', 'Semua', 'bg-slate-100 text-slate-700'], ['Dihuni', 'Dihuni', 'bg-emerald-50 text-emerald-700'], ['Kosong', 'Kosong', 'bg-rose-50 text-rose-700']].map(([value, label, color]) => (
+                      {[['Semua', 'Semua', 'bg-slate-100 text-slate-700'], ['Dihuni', 'Dihuni', 'bg-emerald-50 text-emerald-700'], ['Kosong', 'Kosong', 'bg-rose-50 text-rose-700'], ['PenghuniKeluar', 'Penghuni Keluar', 'bg-amber-50 text-amber-700']].map(([value, label, color]) => (
                         <button key={value} type="button" aria-pressed={unitStatusFilter === value} onClick={() => setUnitStatusFilter(value)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${unitStatusFilter === value ? 'border-indigo-400 ring-2 ring-indigo-500/10' : 'border-transparent'} ${color}`}>
-                          {label} <span className="ml-1 opacity-70">{value === 'Semua' ? schoolRecords.length : schoolRecords.filter(record => value === 'Dihuni' ? record.statusHunian === 'Berpenghuni' : record.statusHunian === 'Tidak Berpenghuni').length}</span>
+                          {label} <span className="ml-1 opacity-70">{value === 'Semua' ? schoolRecords.length : value === 'Dihuni' ? schoolRecords.filter(record => record.statusHunian === 'Berpenghuni').length : value === 'Kosong' ? schoolRecords.filter(record => record.statusHunian === 'Tidak Berpenghuni').length : schoolRecords.filter(record => Array.isArray(record.sejarahPenghuni) && record.sejarahPenghuni.length > 0).length}</span>
                         </button>
                       ))}
                     </div>
