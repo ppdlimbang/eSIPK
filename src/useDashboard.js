@@ -46,7 +46,7 @@ function useDashboard() {
         namaSekolah: '', statusHunian: 'Berpenghuni', bilanganHunian: 1, namaKuarters: '', jenisRumah: 'KUARTERS',
         tahunDibina: '', bilanganBilik: '3', bilik1Status: 'Kosong', bilik1Penghuni: '', bilik2Status: 'Kosong', bilik2Penghuni: '',
         bilik3Status: 'Kosong', bilik3Penghuni: '', ketuaRumah: '', namaPenghuni: '', noKP: '', jawatan: '', noTelefon: '',
-        stesenBertugas: '', statusPerkahwinan: 'Bujang', warden: 'Tidak', tarikhMendiami: '', statusFizikalKuarters: 'Baik', justifikasi: '', justifikasiPPD: '', gambarKerosakan: '', projekNRDA: false
+        stesenBertugas: '', statusPerkahwinan: 'Bujang', warden: 'Tidak', tarikhMendiami: '', statusFizikalKuarters: 'Baik', justifikasi: '', justifikasiPPD: '', gambarKerosakan: '', permintaanGambarPPD: false, permintaanGambarPPDAt: '', projekNRDA: false
       };
       const [formData, setFormData] = useState(initialFormState);
 
@@ -265,7 +265,7 @@ function useDashboard() {
           namaPenghuni: record.namaPenghuni || '', noKP: record.noKP || '', jawatan: record.jawatan || '', noTelefon: record.noTelefon || '',
           stesenBertugas: record.stesenBertugas || '', statusPerkahwinan: record.statusPerkahwinan || 'Bujang', warden: record.warden || 'Tidak',
           tarikhMendiami: parsedTarikh, statusFizikalKuarters: formatConditionStatus(record.statusFizikalKuarters) || 'Baik',
-          justifikasi: record.justifikasi || '', justifikasiPPD: record.justifikasiPPD || '', gambarKerosakan: record.gambarKerosakan || '',
+          justifikasi: record.justifikasi || '', justifikasiPPD: record.justifikasiPPD || '', gambarKerosakan: record.gambarKerosakan || '', permintaanGambarPPD: record.permintaanGambarPPD === true, permintaanGambarPPDAt: record.permintaanGambarPPDAt || '',
           projekNRDA: record.projekNRDA === true || record.projekNRDA === 'TRUE' || String(record.projekNRDA).toUpperCase() === 'TRUE' || record.projekNRDA === 'Ya' || false
         });
         setActiveSchool(record.namaSekolah);
@@ -286,6 +286,21 @@ function useDashboard() {
           const formElement = document.getElementById('borang-pengisian');
           if (formElement) { window.scrollTo({ top: formElement.getBoundingClientRect().top + window.pageYOffset - 80, behavior: 'smooth' }); }
         }, 100);
+      };
+
+      const handleRequestImageUpload = async (record) => {
+        if (loading || authUser?.type !== 'admin' || !record || record.statusFizikalKuarters === 'Baik' || String(record.gambarKerosakan || '').trim() || record.permintaanGambarPPD) return;
+        setLoading(true);
+        const updatedRecord = { ...record, permintaanGambarPPD: true, permintaanGambarPPDAt: new Date().toISOString() };
+        try {
+          const result = await runGas('updateKuartersData', record.id, updatedRecord);
+          if (!result) throw new Error('Permintaan gagal disimpan.');
+          setSubmissions(prev => prev.map(item => item.id === record.id ? updatedRecord : item));
+          setSelectedUnit(updatedRecord);
+          showStatus('success', 'Permintaan muat naik gambar telah dihantar kepada sekolah.');
+        } catch (error) {
+          showStatus('error', error.message || 'Permintaan gambar gagal dihantar.');
+        } finally { setLoading(false); }
       };
 
       const handleRemoveExistingImage = (indexToRemove) => {
@@ -371,7 +386,7 @@ function useDashboard() {
           noKP: String(formData.noKP || ''), jawatan: String(formData.jawatan || ''), noTelefon: String(formData.noTelefon || ''),
           stesenBertugas: String(formData.stesenBertugas || ''), statusPerkahwinan: String(formData.statusPerkahwinan || ''), warden: String(formData.warden || ''),
           tarikhMendiami: String(formData.tarikhMendiami || ''), statusFizikalKuarters: String(formData.statusFizikalKuarters || ''),
-          justifikasi: String(formData.justifikasi || ''), justifikasiPPD: String(formData.justifikasiPPD || ''), gambarKerosakan: finalGambarKerosakanStr, projekNRDA: Boolean(formData.projekNRDA),
+          justifikasi: String(formData.justifikasi || ''), justifikasiPPD: String(formData.justifikasiPPD || ''), gambarKerosakan: finalGambarKerosakanStr, permintaanGambarPPD: Boolean(finalGambarKerosakanStr ? false : formData.permintaanGambarPPD), permintaanGambarPPDAt: String(formData.permintaanGambarPPDAt || ''), projekNRDA: Boolean(formData.projekNRDA),
           updatedAtDate: new Date().toISOString(),
           createdAtDate: editingRecordId ? (safeSubmissions.find(row => row.id === editingRecordId)?.createdAtDate || new Date().toISOString()) : new Date().toISOString()
         });
@@ -650,5 +665,5 @@ function useDashboard() {
       const isSpecialSchool = Boolean(getSpecialSchoolOptions(activeSchool));
 
 
-  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToExcel, inputClass, isSpecialSchool, navigate };
+  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRequestImageUpload, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, exportToExcel, inputClass, isSpecialSchool, navigate };
 }

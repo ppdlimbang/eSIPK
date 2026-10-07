@@ -3,6 +3,7 @@ function FormPage() {
   const [unitStatusFilter, setUnitStatusFilter] = useState('Semua');
   const schoolRecords = useMemo(() => roleFilteredSubmissions.filter(row => isSchoolMatch(row.namaSekolah, activeSchool)), [roleFilteredSubmissions, activeSchool]);
   const displayedSchoolRecords = useMemo(() => schoolRecords.filter(record => unitStatusFilter === 'Semua' || (unitStatusFilter === 'Dihuni' ? record.statusHunian === 'Berpenghuni' : record.statusHunian === 'Tidak Berpenghuni')), [schoolRecords, unitStatusFilter]);
+  const pendingImageRequests = useMemo(() => schoolRecords.filter(record => record.permintaanGambarPPD === true && !String(record.gambarKerosakan || '').trim()), [schoolRecords]);
   useEffect(() => { setUnitStatusFilter('Semua'); }, [activeSchool]);
   const activeSpecialOptions = getSpecialSchoolOptions(activeSchool);
   return (
@@ -98,6 +99,17 @@ function FormPage() {
                   )}
                 </div>
 
+                {authUser?.type === 'school' && pendingImageRequests.length > 0 && (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-start gap-3">
+                    <div className="h-9 w-9 shrink-0 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><Icons.AlertTriangle className="w-5 h-5" /></div>
+                    <div>
+                      <p className="text-sm font-bold text-amber-900">Permintaan gambar daripada PPD</p>
+                      <p className="text-xs font-medium text-amber-800 mt-1">PPD meminta gambar untuk {pendingImageRequests.length} unit yang tidak berada pada kondisi Baik. Sila muat naik gambar di bahagian Kondisi Fizikal & Justifikasi.</p>
+                      <p className="text-[11px] font-semibold text-amber-700 mt-2">{pendingImageRequests.map(record => record.namaKuarters).join(' · ')}</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 p-6 sm:p-10">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 border-b border-slate-50 pb-4">
                     <h3 className="text-lg font-bold text-slate-900 flex items-center gap-3"><span className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><Icons.Database /></span> Rekod Kuarters Semasa</h3>
@@ -139,6 +151,7 @@ function FormPage() {
                            ) : (
                              <div className="bg-white border border-slate-100 p-3 rounded-xl mt-3"><p className="text-[10px] text-slate-400 font-bold uppercase">Kondisi</p><p className="text-xs font-semibold text-rose-600 mt-0.5">{formatConditionStatus(sub.statusFizikalKuarters)}</p></div>
                            )}
+                           {sub.permintaanGambarPPD === true && !String(sub.gambarKerosakan || '').trim() && <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800">Gambar diperlukan oleh PPD</div>}
                          </div>
                        ))}
                      </div>
@@ -291,6 +304,8 @@ function FormPage() {
 
                       <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Lampiran Gambar Kerosakan (Pilihan)</label>
+
+                        {formData.permintaanGambarPPD && !formData.gambarKerosakan && <p className="text-xs text-amber-800 mb-3 font-bold bg-amber-50 p-3 rounded-xl border border-amber-200">PPD meminta gambar untuk rekod ini. Sila muat naik sekurang-kurangnya satu gambar.</p>}
 
                         <p className="text-[11px] text-rose-600 mb-2 font-extrabold bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-start gap-2">
                           <Icons.AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />

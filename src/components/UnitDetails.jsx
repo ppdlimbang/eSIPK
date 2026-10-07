@@ -1,5 +1,5 @@
 function UnitDetails() {
-  const { selectedUnit, setSelectedUnit, authUser, setActiveSchool, handleEditRow, navigate } = useAppContext();
+  const { selectedUnit, setSelectedUnit, authUser, setActiveSchool, handleEditRow, handleRequestImageUpload, navigate } = useAppContext();
   const openPpdReview = () => {
     setSelectedUnit(null);
     setActiveSchool(selectedUnit.namaSekolah);
@@ -84,6 +84,12 @@ function UnitDetails() {
                         </div>
                         {authUser?.type === 'admin' && <button type="button" onClick={openPpdReview} className="shrink-0 rounded-xl bg-indigo-600 px-3 py-2 text-[11px] font-bold text-white hover:bg-indigo-700 transition-colors">{selectedUnit.justifikasiPPD ? 'Kemas kini' : 'Beri maklum balas'}</button>}
                       </div>
+                    </div>
+                  )}
+                  {authUser?.type === 'admin' && selectedUnit.statusFizikalKuarters !== 'Baik' && !String(selectedUnit.gambarKerosakan || '').trim() && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div><p className="text-[10px] font-bold uppercase tracking-widest text-amber-800">Lampiran gambar</p><p className="text-sm font-semibold text-amber-900 mt-1">Sekolah belum memuat naik gambar untuk kondisi ini.</p></div>
+                      <button type="button" onClick={() => handleRequestImageUpload(selectedUnit)} disabled={selectedUnit.permintaanGambarPPD === true} className="shrink-0 rounded-xl bg-amber-600 px-3 py-2 text-[11px] font-bold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-amber-300 transition-colors">{selectedUnit.permintaanGambarPPD === true ? 'Permintaan telah dihantar' : 'Minta sekolah muat naik'}</button>
                     </div>
                   )}
                   {selectedUnit.gambarKerosakan && (
