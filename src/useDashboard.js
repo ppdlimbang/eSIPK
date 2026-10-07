@@ -303,6 +303,23 @@ function useDashboard() {
         } finally { setLoading(false); }
       };
 
+      const handleSavePpdFeedback = async (record, feedback) => {
+        if (loading || authUser?.type !== 'admin' || !record || record.statusFizikalKuarters === 'Baik') return;
+        const cleanFeedback = String(feedback || '').trim();
+        if (!cleanFeedback) { showStatus('error', 'Sila isi maklum balas PPD terlebih dahulu.'); return; }
+        setLoading(true);
+        const updatedRecord = { ...record, justifikasiPPD: cleanFeedback };
+        try {
+          const result = await runGas('updateKuartersData', record.id, updatedRecord);
+          if (!result) throw new Error('Maklum balas gagal disimpan.');
+          setSubmissions(prev => prev.map(item => item.id === record.id ? updatedRecord : item));
+          setSelectedUnit(updatedRecord);
+          showStatus('success', 'Maklum balas PPD berjaya disimpan.');
+        } catch (error) {
+          showStatus('error', error.message || 'Maklum balas PPD gagal disimpan.');
+        } finally { setLoading(false); }
+      };
+
       const handleRemoveExistingImage = (indexToRemove) => {
         if (!window.confirm('Adakah anda pasti untuk memadam gambar ini dari senarai?')) return;
         const currentUrls = formData.gambarKerosakan.split(',').map(s => s.trim()).filter(Boolean);
@@ -665,5 +682,5 @@ function useDashboard() {
       const isSpecialSchool = Boolean(getSpecialSchoolOptions(activeSchool));
 
 
-  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRequestImageUpload, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, exportToExcel, inputClass, isSpecialSchool, navigate };
+  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRequestImageUpload, handleSavePpdFeedback, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToExcel, inputClass, isSpecialSchool, navigate };
 }

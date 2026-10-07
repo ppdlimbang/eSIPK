@@ -1,5 +1,6 @@
 function UnitDetails() {
-  const { selectedUnit, setSelectedUnit, authUser, setActiveSchool, handleEditRow, handleRequestImageUpload, navigate } = useAppContext();
+  const { selectedUnit, setSelectedUnit, authUser, loading, setActiveSchool, handleEditRow, handleRequestImageUpload, handleSavePpdFeedback, navigate } = useAppContext();
+  const [ppdFeedback, setPpdFeedback] = useState('');
   const openPpdReview = () => {
     setSelectedUnit(null);
     setActiveSchool(selectedUnit.namaSekolah);
@@ -7,6 +8,7 @@ function UnitDetails() {
     navigate('form');
     setTimeout(() => document.getElementById('borang-pengisian')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
   };
+  useEffect(() => { setPpdFeedback(String(selectedUnit?.justifikasiPPD || '')); }, [selectedUnit]);
   const dialogRef = useRef(null);
   useEffect(() => {
     if (!selectedUnit) return;
@@ -78,11 +80,13 @@ function UnitDetails() {
                   {selectedUnit.statusFizikalKuarters !== 'Baik' && (
                     <div className={`p-5 rounded-2xl border ${selectedUnit.justifikasiPPD ? 'bg-indigo-50 border-indigo-200' : 'bg-amber-50 border-amber-200'}`}>
                       <div className="flex items-start justify-between gap-4">
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <p className={`text-[10px] font-bold uppercase tracking-widest ${selectedUnit.justifikasiPPD ? 'text-indigo-800' : 'text-amber-800'}`}>Justifikasi Pegawai Pembangunan / Penolong Jurutera PPD</p>
-                          {selectedUnit.justifikasiPPD ? <p className="text-sm font-semibold text-indigo-900 mt-2 leading-relaxed">{String(selectedUnit.justifikasiPPD)}</p> : <p className="text-sm font-semibold text-amber-900 mt-2">Belum ada maklum balas PPD.</p>}
+                          {authUser?.type === 'admin' ? (
+                            <textarea value={ppdFeedback} onChange={(event) => setPpdFeedback(event.target.value)} rows="3" placeholder="Tulis maklum balas PPD untuk sekolah..." className="mt-3 w-full rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm font-medium text-indigo-900 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10" />
+                          ) : selectedUnit.justifikasiPPD ? <p className="text-sm font-semibold text-indigo-900 mt-2 leading-relaxed">{String(selectedUnit.justifikasiPPD)}</p> : <p className="text-sm font-semibold text-amber-900 mt-2">Belum ada maklum balas PPD.</p>}
                         </div>
-                        {authUser?.type === 'admin' && <button type="button" onClick={openPpdReview} className="shrink-0 rounded-xl bg-indigo-600 px-3 py-2 text-[11px] font-bold text-white hover:bg-indigo-700 transition-colors">{selectedUnit.justifikasiPPD ? 'Kemas kini' : 'Beri maklum balas'}</button>}
+                        {authUser?.type === 'admin' && <button type="button" onClick={() => handleSavePpdFeedback(selectedUnit, ppdFeedback)} disabled={loading} className="shrink-0 self-end rounded-xl bg-indigo-600 px-3 py-2 text-[11px] font-bold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors">{loading ? 'Menyimpan...' : 'Simpan maklum balas'}</button>}
                       </div>
                     </div>
                   )}
