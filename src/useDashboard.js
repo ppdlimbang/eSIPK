@@ -352,7 +352,7 @@ function useDashboard() {
         } finally { setLoading(false); }
       };
 
-      const handleSingleOccupantMovedOut = async (record) => {
+      const handleSingleOccupantMovedOut = async (record, selectedRoom) => {
         if (loading || !record || record.statusHunian !== 'Berpenghuni') return;
         const occupants = [1, 2, 3]
           .filter(index => record[`bilik${index}Status`] === 'Diisi' || (index === 1 && String(record.namaPenghuni || '').trim()))
@@ -362,10 +362,8 @@ function useDashboard() {
           showStatus('error', 'Hanya seorang penghuni direkodkan. Gunakan pilihan semua penghuni keluar.');
           return;
         }
-        const choice = window.prompt(`Pilih nombor penghuni yang keluar:\n${occupants.map((item, index) => `${index + 1}. ${item.name} (Bilik ${item.room})`).join('\n')}`, '1');
-        const selectedIndex = Number(choice) - 1;
-        if (!Number.isInteger(selectedIndex) || !occupants[selectedIndex]) return;
-        const selected = occupants[selectedIndex];
+        const selected = occupants.find(item => item.room === Number(selectedRoom));
+        if (!selected) return;
         if (!window.confirm(`Rekod ${selected.name} sebagai penghuni yang keluar?`)) return;
         setLoading(true);
         const previousOccupant = {

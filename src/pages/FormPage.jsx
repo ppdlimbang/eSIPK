@@ -1,12 +1,17 @@
 function FormPage() {
   const { authUser, view, submissions, schools, loading, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, roleFilteredSubmissions, handleChange, handleEditRow, handleCancelEdit, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleDeleteRow, handleOccupantMovedOut, handleSingleOccupantMovedOut, inputClass, isSpecialSchool } = useAppContext();
   const [unitStatusFilter, setUnitStatusFilter] = useState('Semua');
+  const [occupantExitRecord, setOccupantExitRecord] = useState(null);
   const schoolRecords = useMemo(() => roleFilteredSubmissions.filter(row => isSchoolMatch(row.namaSekolah, activeSchool)), [roleFilteredSubmissions, activeSchool]);
   const displayedSchoolRecords = useMemo(() => schoolRecords.filter(record => unitStatusFilter === 'Semua' || (unitStatusFilter === 'Dihuni' ? record.statusHunian === 'Berpenghuni' : record.statusHunian === 'Tidak Berpenghuni')), [schoolRecords, unitStatusFilter]);
   const pendingImageRequests = useMemo(() => schoolRecords.filter(record => record.permintaanGambarPPD === true && !String(record.gambarKerosakan || '').trim()), [schoolRecords]);
   const ppdFeedbackNotifications = useMemo(() => schoolRecords.filter(record => String(record.justifikasiPPD || '').trim()), [schoolRecords]);
   useEffect(() => { setUnitStatusFilter('Semua'); }, [activeSchool]);
   const activeSpecialOptions = getSpecialSchoolOptions(activeSchool);
+  const occupantExitOptions = occupantExitRecord ? [1, 2, 3]
+    .filter(index => occupantExitRecord[`bilik${index}Status`] === 'Diisi' || (index === 1 && String(occupantExitRecord.namaPenghuni || '').trim()))
+    .map(index => ({ room: index, name: String(occupantExitRecord[`bilik${index}Penghuni`] || (index === 1 ? occupantExitRecord.namaPenghuni : '')).trim() || `Penghuni Bilik ${index}` }))
+    .filter(item => item.name) : [];
   return (
 <>
             {view === 'form' && !activeSchool && authUser?.type === 'admin' && (
@@ -165,7 +170,7 @@ function FormPage() {
                            )}
                            {sub.statusHunian === 'Berpenghuni' && (authUser?.type === 'admin' || authUser?.type === 'school') && (
                              <div className="mt-3 grid grid-cols-1 gap-2">
-                               <button type="button" onClick={() => handleSingleOccupantMovedOut(sub)} disabled={loading} className="w-full rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-2 text-[10px] font-bold text-indigo-800 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 transition-colors">Seorang penghuni keluar</button>
+                               <button type="button" onClick={() => setOccupantExitRecord(sub)} disabled={loading} className="w-full rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-2 text-[10px] font-bold text-indigo-800 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 transition-colors">Seorang penghuni keluar</button>
                                <button type="button" onClick={() => handleOccupantMovedOut(sub)} disabled={loading} className="w-full rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 transition-colors">Semua penghuni keluar</button>
                              </div>
                            )}
@@ -391,7 +396,29 @@ function FormPage() {
               </div>
             )}
 
-            {}
+            {occupantExitRecord && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="occupant-exit-title">
+                <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Kemaskini penghuni</p>
+                      <h3 id="occupant-exit-title" className="mt-1 text-xl font-black text-slate-900">Siapa yang keluar?</h3>
+                      <p className="mt-2 text-xs font-medium text-slate-500">Pilih seorang penghuni. Rekod ini akan disimpan dalam sejarah penghuni.</p>
+                    </div>
+                    <button type="button" onClick={() => setOccupantExitRecord(null)} className="h-9 w-9 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200" aria-label="Tutup">×</button>
+                  </div>
+                  <div className="mt-5 space-y-2">
+                    {occupantExitOptions.length > 1 ? occupantExitOptions.map((occupant) => (
+                      <button key={occupant.room} type="button" onClick={async () => { await handleSingleOccupantMovedOut(occupantExitRecord, occupant.room); setOccupantExitRecord(null); }} disabled={loading} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-left hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-50 transition-colors">
+                        <span className="block text-sm font-extrabold text-slate-800">{occupant.name}</span>
+                        <span className="block mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Bilik {occupant.room}</span>
+                      </button>
+                    )) : <p className="rounded-xl bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800">Hanya seorang penghuni direkodkan. Gunakan pilihan “Semua penghuni keluar”.</p>}
+                  </div>
+                  <button type="button" onClick={() => setOccupantExitRecord(null)} className="mt-5 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50">Batal</button>
+                </div>
+              </div>
+            )}
 
 </>
   );
