@@ -1,10 +1,11 @@
 function DashboardPage() {
-  const { authUser, view, schools, activityLogs, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, setSelectedUnit, setActiveSchool, handleEditRow, navigate, filteredSubmissions, baseFilteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, exportToExcel } = useAppContext();
+  const { authUser, view, schools, activityLogs, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, setSelectedUnit, setActiveSchool, handleEditRow, navigate, filteredSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, exportToExcel } = useAppContext();
   const [page, setPage] = useState(1);
   const [showActivityLogs, setShowActivityLogs] = useState(false);
   const [showPpdReviewOnly, setShowPpdReviewOnly] = useState(false);
   const pageSize = 25;
   const ppdReviewRows = baseFilteredSubmissions.filter(sub => sub?.statusFizikalKuarters !== 'Baik' && !String(sub?.justifikasiPPD || '').trim());
+  const pendingImageRequests = roleFilteredSubmissions.filter(record => (record.permintaanGambarPPD === true || String(record.permintaanGambarPPD).toUpperCase() === 'TRUE') && !String(record.gambarKerosakan || '').trim());
   const displayedSubmissions = showPpdReviewOnly ? filteredSubmissions.filter(sub => ppdReviewRows.some(row => row.id === sub.id)) : filteredSubmissions;
   const ppdReviewUnits = ppdReviewRows.length;
   const pageCount = Math.max(1, Math.ceil(displayedSubmissions.length / pageSize));
@@ -48,6 +49,20 @@ function DashboardPage() {
                     <div><p className="text-4xl font-extrabold text-rose-700">{unoccupiedUnits}</p><p className="text-xs font-bold text-rose-400 uppercase tracking-widest mt-2">Rekod Unit Kosong</p></div>
                   </div>
                 </div>
+
+                {authUser?.type === 'school' && pendingImageRequests.length > 0 && (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 shrink-0 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><Icons.AlertTriangle className="w-5 h-5" /></div>
+                      <div>
+                        <p className="text-sm font-bold text-amber-900">Permintaan gambar daripada PPD</p>
+                        <p className="text-xs font-medium text-amber-800 mt-1">PPD meminta gambar untuk {pendingImageRequests.length} rekod. Sila buka Pengisian dan muat naik gambar yang diminta.</p>
+                        <p className="text-[11px] font-semibold text-amber-700 mt-2">{pendingImageRequests.map(record => record.namaKuarters).join(' · ')}</p>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => navigate('form')} className="shrink-0 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors">Buka rekod</button>
+                  </div>
+                )}
 
                 {authUser?.type === 'admin' && (
                   <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">

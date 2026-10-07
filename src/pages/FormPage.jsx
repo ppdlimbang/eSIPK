@@ -10,7 +10,7 @@ function FormPage() {
     if (unitStatusFilter === 'PenghuniKeluar') return Array.isArray(record.sejarahPenghuni) && record.sejarahPenghuni.length > 0;
     return true;
   }), [schoolRecords, unitStatusFilter]);
-  const pendingImageRequests = useMemo(() => schoolRecords.filter(record => record.permintaanGambarPPD === true && !String(record.gambarKerosakan || '').trim()), [schoolRecords]);
+  const pendingImageRequests = useMemo(() => schoolRecords.filter(record => (record.permintaanGambarPPD === true || String(record.permintaanGambarPPD).toUpperCase() === 'TRUE') && !String(record.gambarKerosakan || '').trim()), [schoolRecords]);
   const ppdFeedbackNotifications = useMemo(() => schoolRecords.filter(record => String(record.justifikasiPPD || '').trim()), [schoolRecords]);
   useEffect(() => { setUnitStatusFilter('Semua'); }, [activeSchool]);
   const activeSpecialOptions = getSpecialSchoolOptions(activeSchool);
@@ -179,7 +179,7 @@ function FormPage() {
                                <button type="button" onClick={() => handleOccupantMovedOut(sub)} disabled={loading} className="w-full rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 transition-colors">Semua penghuni keluar</button>
                              </div>
                            )}
-                           {sub.permintaanGambarPPD === true && !String(sub.gambarKerosakan || '').trim() && <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800">Gambar diperlukan oleh PPD</div>}
+                           {(sub.permintaanGambarPPD === true || String(sub.permintaanGambarPPD).toUpperCase() === 'TRUE') && !String(sub.gambarKerosakan || '').trim() && <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800">Gambar diperlukan oleh PPD</div>}
                            {String(sub.justifikasiPPD || '').trim() && <div className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-2 text-[10px] font-bold text-indigo-800">Maklum balas PPD tersedia</div>}
                          </div>
                        ))}
