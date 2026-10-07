@@ -1,6 +1,7 @@
 function UnitDetails() {
   const { selectedUnit, setSelectedUnit, authUser, loading, setActiveSchool, handleEditRow, handleRequestImageUpload, handleSavePpdFeedback, navigate } = useAppContext();
   const [ppdFeedback, setPpdFeedback] = useState('');
+  const [lightboxUrl, setLightboxUrl] = useState('');
   const openPpdReview = () => {
     setSelectedUnit(null);
     setActiveSchool(selectedUnit.namaSekolah);
@@ -9,6 +10,7 @@ function UnitDetails() {
     setTimeout(() => document.getElementById('borang-pengisian')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0);
   };
   useEffect(() => { setPpdFeedback(String(selectedUnit?.justifikasiPPD || '')); }, [selectedUnit]);
+  useEffect(() => { if (!selectedUnit) setLightboxUrl(''); }, [selectedUnit]);
   const dialogRef = useRef(null);
   useEffect(() => {
     if (!selectedUnit) return;
@@ -17,7 +19,7 @@ function UnitDetails() {
     document.body.style.overflow = 'hidden';
     dialogRef.current?.focus();
     const onKeyDown = event => {
-      if (event.key === 'Escape') { event.preventDefault(); setSelectedUnit(null); }
+      if (event.key === 'Escape') { event.preventDefault(); if (lightboxUrl) setLightboxUrl(''); else setSelectedUnit(null); }
       if (event.key !== 'Tab') return;
       const nodes = dialogRef.current?.querySelectorAll('button, a[href], input, select, textarea, iframe, [tabindex="0"]');
       if (!nodes?.length) { event.preventDefault(); return; }
@@ -27,7 +29,7 @@ function UnitDetails() {
     };
     document.addEventListener('keydown', onKeyDown);
     return () => { document.body.style.overflow = oldOverflow; document.removeEventListener('keydown', onKeyDown); previousFocus?.focus(); };
-  }, [selectedUnit]);
+  }, [selectedUnit, lightboxUrl]);
   return (
 <>
           {selectedUnit && (
@@ -106,7 +108,7 @@ function UnitDetails() {
                             return (
                               <div key={idx} className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50 relative flex flex-col items-center justify-center p-3">
                                  <Attachment preview value={trimmedUrl} title="Pratonton lampiran" loading="lazy"  className="w-full h-[300px] rounded-lg shadow-sm border-0 bg-slate-100" allow="autoplay" />
-                                 <Attachment value={trimmedUrl} target="_blank" rel="noreferrer" className="mt-4 bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md hover:bg-slate-700 transition-colors w-full text-center">Buka Saiz Penuh (Lampiran {idx + 1})</Attachment>
+                                 <Attachment value={trimmedUrl} onOpen={setLightboxUrl} className="mt-4 bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md hover:bg-slate-700 transition-colors w-full text-center">Buka Saiz Penuh (Lampiran {idx + 1})</Attachment>
                               </div>
                             );
                          })}
@@ -115,6 +117,12 @@ function UnitDetails() {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+          {lightboxUrl && (
+            <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/85 p-4 sm:p-8" onClick={() => setLightboxUrl('')}>
+              <button type="button" aria-label="Tutup gambar penuh" onClick={() => setLightboxUrl('')} className="absolute top-4 right-4 h-11 w-11 rounded-full bg-white/10 text-white text-2xl hover:bg-white/20 transition-colors">×</button>
+              <img src={lightboxUrl} alt="Lampiran gambar penuh" className="max-h-[90vh] max-w-[95vw] object-contain rounded-xl shadow-2xl" onClick={(event) => event.stopPropagation()} />
             </div>
           )}
 

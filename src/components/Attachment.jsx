@@ -1,4 +1,4 @@
-function Attachment({ value, preview = false, children, ...props }) {
+function Attachment({ value, preview = false, onOpen, children, ...props }) {
   const [url, setUrl] = useState('');
   const [error, setError] = useState(false);
   useEffect(() => {
@@ -17,5 +17,6 @@ function Attachment({ value, preview = false, children, ...props }) {
   if (error) return <span role="status" className="text-sm text-rose-600">Lampiran tidak dapat dibuka.</span>;
   if (!url) return <span className="text-sm text-slate-500">Memuatkan lampiran...</span>;
   if (preview) return <iframe {...props} title="Pratonton lampiran" loading="lazy" src={getPreviewUrl(url)} />;
+  if (onOpen) return <button type="button" {...props} onClick={() => onOpen(getViewerUrl(url))}>{children}</button>;
   return <a {...props} href={getViewerUrl(url)} target="_blank" rel="noreferrer">{children}</a>;
 }
