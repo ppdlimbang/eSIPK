@@ -308,7 +308,7 @@ function useDashboard() {
         const cleanFeedback = String(feedback || '').trim();
         if (!cleanFeedback) { showStatus('error', 'Sila isi maklum balas PPD terlebih dahulu.'); return; }
         setLoading(true);
-        const updatedRecord = { ...record, justifikasiPPD: cleanFeedback };
+        const updatedRecord = { ...record, justifikasiPPD: cleanFeedback, updatedAtDate: new Date().toISOString() };
         try {
           const result = await runGas('updateKuartersData', record.id, updatedRecord);
           if (!result) throw new Error('Maklum balas gagal disimpan.');

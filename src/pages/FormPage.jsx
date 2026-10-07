@@ -4,6 +4,7 @@ function FormPage() {
   const schoolRecords = useMemo(() => roleFilteredSubmissions.filter(row => isSchoolMatch(row.namaSekolah, activeSchool)), [roleFilteredSubmissions, activeSchool]);
   const displayedSchoolRecords = useMemo(() => schoolRecords.filter(record => unitStatusFilter === 'Semua' || (unitStatusFilter === 'Dihuni' ? record.statusHunian === 'Berpenghuni' : record.statusHunian === 'Tidak Berpenghuni')), [schoolRecords, unitStatusFilter]);
   const pendingImageRequests = useMemo(() => schoolRecords.filter(record => record.permintaanGambarPPD === true && !String(record.gambarKerosakan || '').trim()), [schoolRecords]);
+  const ppdFeedbackNotifications = useMemo(() => schoolRecords.filter(record => String(record.justifikasiPPD || '').trim()), [schoolRecords]);
   useEffect(() => { setUnitStatusFilter('Semua'); }, [activeSchool]);
   const activeSpecialOptions = getSpecialSchoolOptions(activeSchool);
   return (
@@ -110,6 +111,17 @@ function FormPage() {
                   </div>
                 )}
 
+                {authUser?.type === 'school' && ppdFeedbackNotifications.length > 0 && (
+                  <div className="rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 flex items-start gap-3">
+                    <div className="h-9 w-9 shrink-0 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center"><Icons.FileText className="w-5 h-5" /></div>
+                    <div>
+                      <p className="text-sm font-bold text-indigo-900">Pemakluman maklum balas daripada PPD</p>
+                      <p className="text-xs font-medium text-indigo-800 mt-1">PPD telah mengisi justifikasi untuk {ppdFeedbackNotifications.length} unit. Sila semak maklum balas pada butiran unit di bawah.</p>
+                      <p className="text-[11px] font-semibold text-indigo-700 mt-2">{ppdFeedbackNotifications.map(record => record.namaKuarters).join(' · ')}</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 p-6 sm:p-10">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 border-b border-slate-50 pb-4">
                     <h3 className="text-lg font-bold text-slate-900 flex items-center gap-3"><span className="h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><Icons.Database /></span> Rekod Kuarters Semasa</h3>
@@ -152,6 +164,7 @@ function FormPage() {
                              <div className="bg-white border border-slate-100 p-3 rounded-xl mt-3"><p className="text-[10px] text-slate-400 font-bold uppercase">Kondisi</p><p className="text-xs font-semibold text-rose-600 mt-0.5">{formatConditionStatus(sub.statusFizikalKuarters)}</p></div>
                            )}
                            {sub.permintaanGambarPPD === true && !String(sub.gambarKerosakan || '').trim() && <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] font-bold text-amber-800">Gambar diperlukan oleh PPD</div>}
+                           {String(sub.justifikasiPPD || '').trim() && <div className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-2 text-[10px] font-bold text-indigo-800">Maklum balas PPD tersedia</div>}
                          </div>
                        ))}
                      </div>
