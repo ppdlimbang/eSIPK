@@ -89,14 +89,14 @@ function ActivityLogPage() {
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="p-6 sm:p-8 border-b border-slate-50">
           <h3 className="text-xl font-black text-slate-900">Senarai Log Masuk Terkini</h3>
-          <p className="text-xs font-semibold text-slate-500 mt-1">Masa dan tarikh untuk 50 log masuk sekolah terbaru.</p>
+          <p className="text-xs font-semibold text-slate-500 mt-1">Masa dan tarikh untuk 50 log masuk sekolah terbaru. Gunakan skrol dalam senarai untuk melihat rekod lama.</p>
         </div>
         {rows.length === 0 ? (
           <div className="p-10 text-center text-sm font-semibold text-slate-400">Belum ada sejarah log masuk.</div>
         ) : (
-          <div className="divide-y divide-slate-50">
+          <div className="max-h-[30rem] overflow-y-auto divide-y divide-slate-50">
             {rows.slice(0, 50).map((log) => (
-              <div key={log.id} className="p-5 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 hover:bg-slate-50/70 transition-colors">
+              <div key={log.id} className="px-5 py-3 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 hover:bg-slate-50/70 transition-colors">
                 <div>
                   <p className="font-extrabold text-slate-800">{formatSchoolName(log.namaSekolah || 'Sekolah tidak diketahui')}</p>
                   <p className="text-xs font-bold text-indigo-600 mt-1">{log.email || '-'}</p>
