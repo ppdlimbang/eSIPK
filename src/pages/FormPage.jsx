@@ -28,10 +28,9 @@ function FormPage() {
                       const schoolSubmissions = (Array.isArray(submissions) ? submissions : []).filter(sub => sub && isSchoolMatch(sub.namaSekolah, school));
                       const hasSubmitted = schoolSubmissions.length > 0;
                       const schoolUnitSummary = schoolSubmissions.reduce((summary, submission) => {
-                        const quantity = Number(submission?.bilanganHunian) || 1;
-                        summary.total += quantity;
-                        if (submission?.statusHunian === 'Berpenghuni') summary.occupied += quantity;
-                        if (submission?.statusHunian === 'Tidak Berpenghuni') summary.vacant += quantity;
+                        summary.total += 1;
+                        if (submission?.statusHunian === 'Berpenghuni') summary.occupied += 1;
+                        if (submission?.statusHunian === 'Tidak Berpenghuni') summary.vacant += 1;
                         return summary;
                       }, { total: 0, occupied: 0, vacant: 0 });
 

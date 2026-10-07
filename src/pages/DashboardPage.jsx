@@ -6,7 +6,7 @@ function DashboardPage() {
   const pageSize = 25;
   const ppdReviewRows = baseFilteredSubmissions.filter(sub => sub?.statusFizikalKuarters !== 'Baik' && !String(sub?.justifikasiPPD || '').trim());
   const displayedSubmissions = showPpdReviewOnly ? filteredSubmissions.filter(sub => ppdReviewRows.some(row => row.id === sub.id)) : filteredSubmissions;
-  const ppdReviewUnits = ppdReviewRows.reduce((total, row) => total + (Number(row?.bilanganHunian) || 1), 0);
+  const ppdReviewUnits = ppdReviewRows.length;
   const pageCount = Math.max(1, Math.ceil(displayedSubmissions.length / pageSize));
   const currentPage = Math.min(page, pageCount);
   const pageRows = displayedSubmissions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -37,15 +37,15 @@ function DashboardPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="bg-gradient-to-br from-indigo-50/80 to-white p-6 sm:p-8 rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-indigo-100 flex flex-col justify-between">
                     <div className="h-12 w-12 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100 mb-6"><Icons.Building2 /></div>
-                    <div><p className="text-4xl font-extrabold text-indigo-900">{totalUnits}</p><p className="text-xs font-bold text-indigo-500 uppercase tracking-widest mt-2">Kapasiti Terdaftar</p></div>
+                    <div><p className="text-4xl font-extrabold text-indigo-900">{totalUnits}</p><p className="text-xs font-bold text-indigo-500 uppercase tracking-widest mt-2">Rekod Kuarters Berdaftar</p></div>
                   </div>
                   <div className="bg-gradient-to-br from-emerald-50/80 to-white p-6 sm:p-8 rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-emerald-100 flex flex-col justify-between">
                     <div className="h-12 w-12 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100 mb-6"><Icons.Users /></div>
-                    <div><p className="text-4xl font-extrabold text-emerald-700">{occupiedUnits}</p><p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-2">Sedang Dihuni</p></div>
+                    <div><p className="text-4xl font-extrabold text-emerald-700">{occupiedUnits}</p><p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-2">Rekod Sedang Dihuni</p></div>
                   </div>
                   <div className="bg-gradient-to-br from-rose-50/80 to-white p-6 sm:p-8 rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-rose-100 flex flex-col justify-between">
                     <div className="h-12 w-12 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm border border-rose-100 mb-6"><Icons.AlertTriangle /></div>
-                    <div><p className="text-4xl font-extrabold text-rose-700">{unoccupiedUnits}</p><p className="text-xs font-bold text-rose-400 uppercase tracking-widest mt-2">Unit Kosong</p></div>
+                    <div><p className="text-4xl font-extrabold text-rose-700">{unoccupiedUnits}</p><p className="text-xs font-bold text-rose-400 uppercase tracking-widest mt-2">Rekod Unit Kosong</p></div>
                   </div>
                 </div>
 
@@ -138,7 +138,7 @@ function DashboardPage() {
                     <div className="flex items-start gap-3">
                       <div className="h-9 w-9 shrink-0 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><Icons.AlertTriangle className="w-5 h-5" /></div>
                       <div>
-                        <p className="text-sm font-bold text-amber-900">{ppdReviewUnits} unit memerlukan semakan PPD</p>
+                        <p className="text-sm font-bold text-amber-900">{ppdReviewUnits} rekod memerlukan semakan PPD</p>
                         <p className="text-xs font-medium text-amber-800/80 mt-0.5">Sekolah memilih tahap selain “Baik” dan belum menerima justifikasi pegawai PPD.</p>
                       </div>
                     </div>

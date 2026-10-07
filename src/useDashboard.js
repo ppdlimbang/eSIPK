@@ -193,14 +193,14 @@ function useDashboard() {
         return isConditionMatch(sub.statusFizikalKuarters, kondisiFilter);
       }), [baseFilteredSubmissions, kondisiFilter]);
 
-      const totalUnits = useMemo(() => filteredSubmissions.reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [filteredSubmissions]);
-      const occupiedUnits = useMemo(() => filteredSubmissions.filter(s => s?.statusHunian === 'Berpenghuni').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [filteredSubmissions]);
-      const unoccupiedUnits = useMemo(() => filteredSubmissions.filter(s => s?.statusHunian === 'Tidak Berpenghuni').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [filteredSubmissions]);
+      const totalUnits = useMemo(() => filteredSubmissions.length, [filteredSubmissions]);
+      const occupiedUnits = useMemo(() => filteredSubmissions.filter(s => s?.statusHunian === 'Berpenghuni').length, [filteredSubmissions]);
+      const unoccupiedUnits = useMemo(() => filteredSubmissions.filter(s => s?.statusHunian === 'Tidak Berpenghuni').length, [filteredSubmissions]);
 
-      const kondisiBaik = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Baik').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
-      const kondisiRosakRingan = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Rosak Ringan').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
-      const kondisiRosakBerat = useMemo(() => baseFilteredSubmissions.filter(s => isCriticalDamageStatus(s?.statusFizikalKuarters)).reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
-      const kondisiDiselenggara = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Sedang Diselenggara').reduce((acc, curr) => acc + (Number(curr?.bilanganHunian) || 1), 0), [baseFilteredSubmissions]);
+      const kondisiBaik = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Baik').length, [baseFilteredSubmissions]);
+      const kondisiRosakRingan = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Rosak Ringan').length, [baseFilteredSubmissions]);
+      const kondisiRosakBerat = useMemo(() => baseFilteredSubmissions.filter(s => isCriticalDamageStatus(s?.statusFizikalKuarters)).length, [baseFilteredSubmissions]);
+      const kondisiDiselenggara = useMemo(() => baseFilteredSubmissions.filter(s => s?.statusFizikalKuarters === 'Sedang Diselenggara').length, [baseFilteredSubmissions]);
 
       const showStatus = (type, text) => {
         setStatusMessage({ type, text: String(text) });
