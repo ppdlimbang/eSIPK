@@ -352,6 +352,56 @@ function useDashboard() {
         } finally { setLoading(false); }
       };
 
+      const handleSingleOccupantMovedOut = async (record) => {
+        if (loading || !record || record.statusHunian !== 'Berpenghuni') return;
+        const occupants = [1, 2, 3]
+          .filter(index => record[`bilik${index}Status`] === 'Diisi' || (index === 1 && String(record.namaPenghuni || '').trim()))
+          .map(index => ({ room: index, name: String(record[`bilik${index}Penghuni`] || (index === 1 ? record.namaPenghuni : '')).trim() || `Penghuni Bilik ${index}` }))
+          .filter(item => item.name);
+        if (occupants.length <= 1) {
+          showStatus('error', 'Hanya seorang penghuni direkodkan. Gunakan pilihan semua penghuni keluar.');
+          return;
+        }
+        const choice = window.prompt(`Pilih nombor penghuni yang keluar:\n${occupants.map((item, index) => `${index + 1}. ${item.name} (Bilik ${item.room})`).join('\n')}`, '1');
+        const selectedIndex = Number(choice) - 1;
+        if (!Number.isInteger(selectedIndex) || !occupants[selectedIndex]) return;
+        const selected = occupants[selectedIndex];
+        if (!window.confirm(`Rekod ${selected.name} sebagai penghuni yang keluar?`)) return;
+        setLoading(true);
+        const previousOccupant = {
+          namaPenghuni: selected.name, noKP: String(selected.room === 1 ? record.noKP || '' : ''),
+          jawatan: String(selected.room === 1 ? record.jawatan || '' : ''), noTelefon: String(selected.room === 1 ? record.noTelefon || '' : ''),
+          bilik: selected.room, tarikhMendiami: String(selected.room === 1 ? record.tarikhMendiami || '' : ''),
+          jenisRekod: 'Seorang penghuni keluar', tarikhKeluar: new Date().toISOString()
+        };
+        const updatedRecord = { ...record, sejarahPenghuni: [...(Array.isArray(record.sejarahPenghuni) ? record.sejarahPenghuni : []), previousOccupant], updatedAtDate: new Date().toISOString() };
+        if (selected.room === 1) {
+          updatedRecord.namaPenghuni = '';
+          updatedRecord.noKP = '';
+          updatedRecord.jawatan = '';
+          updatedRecord.noTelefon = '';
+          updatedRecord.stesenBertugas = '';
+          updatedRecord.tarikhMendiami = '';
+          updatedRecord.statusPerkahwinan = '';
+          updatedRecord.warden = '';
+        }
+        updatedRecord[`bilik${selected.room}Status`] = 'Kosong';
+        updatedRecord[`bilik${selected.room}Penghuni`] = '';
+        if (updatedRecord.ketuaRumah === `bilik${selected.room}`) updatedRecord.ketuaRumah = '';
+        const remaining = [1, 2, 3].some(index => updatedRecord[`bilik${index}Status`] === 'Diisi' || (index === 1 && String(updatedRecord.namaPenghuni || '').trim()));
+        updatedRecord.statusHunian = remaining ? 'Berpenghuni' : 'Tidak Berpenghuni';
+        const normalizedRecord = normalizeOccupancy(updatedRecord);
+        try {
+          const result = await runGas('updateKuartersData', record.id, normalizedRecord);
+          if (!result) throw new Error('Rekod penghuni keluar gagal disimpan.');
+          setSubmissions(prev => prev.map(item => item.id === record.id ? { ...normalizedRecord, id: record.id } : item));
+          setSelectedUnit(null);
+          showStatus('success', `${selected.name} disimpan dalam sejarah penghuni.`);
+        } catch (error) {
+          showStatus('error', error.message || 'Gagal merekodkan penghuni keluar.');
+        } finally { setLoading(false); }
+      };
+
       const handleRemoveExistingImage = (indexToRemove) => {
         if (!window.confirm('Adakah anda pasti untuk memadam gambar ini dari senarai?')) return;
         const currentUrls = formData.gambarKerosakan.split(',').map(s => s.trim()).filter(Boolean);
@@ -714,5 +764,5 @@ function useDashboard() {
       const isSpecialSchool = Boolean(getSpecialSchoolOptions(activeSchool));
 
 
-  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRequestImageUpload, handleSavePpdFeedback, handleOccupantMovedOut, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToExcel, inputClass, isSpecialSchool, navigate };
+  return { editSchoolEmail, setEditSchoolEmail, editSchoolPassword, setEditSchoolPassword, handleEditSchoolStart, isAuthenticated, setIsAuthenticated, authReady, authUser, setAuthUser, loginUsername, setLoginUsername, loginPassword, setLoginPassword, loginError, setLoginError, view, setView, submissions, setSubmissions, schools, setSchools, filesList, setFilesList, activityLogs, setActivityLogs, loginLogs, setLoginLogs, newSchoolCode, setNewSchoolCode, newSchoolName, setNewSchoolName, newSchoolEmail, setNewSchoolEmail, newSchoolPassword, setNewSchoolPassword, searchTerm, setSearchTerm, selectedSchoolFilter, setSelectedSchoolFilter, statusFilter, setStatusFilter, kondisiFilter, setKondisiFilter, loading, setLoading, statusMessage, setStatusMessage, selectedUnit, setSelectedUnit, activeSchool, setActiveSchool, editingRecordId, setEditingRecordId, editingSchool, setEditingSchool, editSchoolCode, setEditSchoolCode, editSchoolName, setEditSchoolName, gambarFiles, setGambarFiles, namaBangunanDipilih, setNamaBangunanDipilih, unitBangunanDipilih, setUnitBangunanDipilih, initialFormState, formData, setFormData, fetchInitialData, handleLogin, handleLogout, safeSubmissions, roleFilteredSubmissions, baseFilteredSubmissions, filteredSubmissions, totalUnits, occupiedUnits, unoccupiedUnits, kondisiBaik, kondisiRosakRingan, kondisiRosakBerat, kondisiDiselenggara, showStatus, handleChange, handleEditRow, handleCancelEdit, handleRequestImageUpload, handleSavePpdFeedback, handleOccupantMovedOut, handleSingleOccupantMovedOut, handleRemoveExistingImage, handleRemoveNewFile, handleSubmit, handleAddSchool, handleEditSchoolSave, handleDeleteSchool, handleResetSchools, handleFileUpload, handleDeleteFile, handleDeleteRow, exportToExcel, inputClass, isSpecialSchool, navigate };
 }
